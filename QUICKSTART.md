@@ -14,45 +14,60 @@
 
 ## 安装
 
-### 选项 1: 直接下载二进制 (推荐)
+### 选项 1: 自动化 CLI 安装 ⚡ **推荐**
 
-```bash
-# 自动检测平台并下载
-curl -fsSL https://install.claude-code-rs.io | sh
+使用我们的自动化脚本快速安装，支持所有主流操作系统。
 
-# 或手动下载
-# 访问: https://github.com/yourusername/claude-code-rust/releases
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install.ps1 | iex
 ```
 
-### 选项 2: 从源代码编译
+**Linux / macOS:**
+```bash
+curl -sSL https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install-unix.sh | bash
+```
+
+### 选项 2: 直接下载二进制
+
+从 [GitHub Releases 页面](https://github.com/lorryjovens-hub/claude-code-rust/releases) 下载预编译的二进制文件。
+
+```bash
+# 手动下载后，添加到 PATH
+chmod +x claude-code  # Linux/macOS
+./claude-code --version
+```
+
+### 选项 3: 从源代码编译
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/claude-code-rust
+git clone https://github.com/lorryjovens-hub/claude-code-rust.git
 cd claude-code-rust
 
 # 构建
 cargo build --release
 
-# 可执行文件位于: ./target/release/claude_code_rs
+# 可执行文件位于: ./target/release/claude-code (Linux/macOS) 或 claude-code.exe (Windows)
+./target/release/claude-code --version
 ```
 
-### 选项 3: Docker
+### 选项 4: Docker
 
 ```bash
-# 运行 Docker 容器
-docker run -it claude-code-rust:latest --help
-
-# 或构建本地镜像
+# 构建本地镜像
 docker build -t claude-code-rust .
-docker run -it claude-code-rust --version
+
+# 运行容器
+docker run -it --rm claude-code-rust --version
+docker run -it --rm claude-code-rust repl
 ```
 
 ### 验证安装
 
 ```bash
-claude-code-rs --version
-# 输出: claude-code-rust v0.1.0
+claude-code --version
+# 输出: claude-code v0.1.0
 ```
 
 ---
@@ -63,37 +78,37 @@ claude-code-rs --version
 
 ```bash
 # 显示帮助
-claude-code-rs --help
+claude-code --help
 
 # 显示版本
-claude-code-rs --version
+claude-code --version
 ```
 
 ### 2. 单次查询
 
 ```bash
 # 最简单的用法
-claude-code-rs "What is Rust?"
+claude-code "What is Rust?"
 
 # 使用特定模型
-claude-code-rs --model claude-3-5-sonnet "Explain async/await"
+claude-code --model claude-3-sonnet "Explain async/await"
+
+# 使用 --prompt 标志
+claude-code query --prompt "分析这个项目的结构"
 ```
 
 ### 3. REPL 交互模式
 
 ```bash
 # 启动交互式 REPL
-claude-code-rs
+claude-code repl
 
-# 现在你可以输入多个问题
+# 在 REPL 中你可以输入多个问题
 > What is machine learning?
 > Explain neural networks
-> exit
-
-# 或使用快捷键
 > .help     # 显示帮助
 > .config   # 显示当前配置
-> .quit     # 退出
+> .exit     # 退出
 ```
 
 ### 4. 配置管理

@@ -1,7 +1,7 @@
 # Claude Code Rust 🦀
 
 > 🚀 **Anthropic Claude Code 的 Rust 全量重构版本** - 性能提升 **2.5x**，体积减少 **97%**，零依赖原生安全
-
+,
 <div align="center">
 
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&logoColor=white)](https://www.rust-lang.org/)
@@ -237,6 +237,41 @@ cargo build --release
 #### 方式二：直接下载
 
 从 [Releases](https://github.com/lorryjovens-hub/claude-code-rust/releases) 页面下载预编译的二进制文件。
+
+#### 方式三：自动化 CLI 安装 ⚡ **推荐**
+
+我们提供了跨平台的自动化安装脚本，可以自动检测系统、下载最新版本、配置 PATH。
+
+**Windows (PowerShell):**
+```powershell
+# 运行安装脚本
+irm https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install.ps1 | iex
+
+# 或指定安装路径
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install.ps1" -OutFile "install.ps1"
+.\install.ps1 -Path "C:\Program Files\claude-code"
+```
+
+**Linux / macOS:**
+```bash
+# 自动检测系统并安装
+curl -sSL https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install-unix.sh | bash
+
+# 或指定安装路径
+bash <(curl -sSL https://raw.githubusercontent.com/lorryjovens-hub/claude-code-rust/master/install-unix.sh) --path ~/.local/bin
+```
+
+**功能特性:**
+- ✅ 自动检测操作系统和架构 (Linux/macOS/Windows, x86_64/aarch64)
+- ✅ 交互式选择安装路径，支持多个选项
+- ✅ 自动从 GitHub Releases 下载最新版本
+- ✅ 支持 PATH 自动配置
+- ✅ 安装完成后自动验证
+- ✅ 色彩输出，用户友好的提示信息
+
+**环境要求:**
+- Windows: PowerShell 5.0+ (Win10/11 内置)
+- Linux/macOS: Bash 4.0+, curl, tar
 
 ### 配置 API
 
