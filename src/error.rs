@@ -6,11 +6,54 @@ use libloading;
 /// Result type for Claude Code operations
 pub type Result<T> = std::result::Result<T, ClaudeError>;
 
+/// Configuration specific error
+#[derive(Debug)]
+pub enum ConfigError {
+    /// Invalid configuration setting
+    InvalidSetting(String),
+    /// Configuration validation failed
+    ValidationFailed(Vec<crate::config::ValidationError>),
+    /// Configuration migration failed
+    MigrationFailed(String),
+    /// Configuration file not found
+    NotFound(String),
+    /// Configuration version mismatch
+    VersionMismatch {
+        expected: String,
+        found: String,
+    },
+}
+
+impl fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConfigError::InvalidSetting(msg) => write!(f, "Invalid configuration setting: {}", msg),
+            ConfigError::ValidationFailed(errors) => {
+                write!(f, "Configuration validation failed:")?;
+                for err in errors {
+                    write!(f, "\n  - {}", err)?;
+                }
+                Ok(())
+            }
+            ConfigError::MigrationFailed(msg) => write!(f, "Configuration migration failed: {}", msg),
+            ConfigError::NotFound(msg) => write!(f, "Configuration not found: {}", msg),
+            ConfigError::VersionMismatch { expected, found } => {
+                write!(f, "Configuration version mismatch: expected {}, found {}", expected, found)
+            }
+        }
+    }
+}
+
+impl std::error::Error for ConfigError {}
+
 /// Main error type for Claude Code
 #[derive(Debug)]
 pub enum ClaudeError {
     /// Configuration error
     Config(String),
+    
+    /// Configuration specific error
+    ConfigError(ConfigError),
     
     /// IO error
     Io(std::io::Error),
@@ -59,6 +102,7 @@ impl fmt::Display for ClaudeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ClaudeError::Config(msg) => write!(f, "Configuration error: {}", msg),
+            ClaudeError::ConfigError(err) => write!(f, "{}", err),
             ClaudeError::Io(err) => write!(f, "IO error: {}", err),
             ClaudeError::File(msg) => write!(f, "File error: {}", msg),
             ClaudeError::Network(err) => write!(f, "Network error: {}", err),
@@ -154,5 +198,11 @@ impl<T> From<tokio::sync::broadcast::error::SendError<T>> for ClaudeError {
 impl From<libloading::Error> for ClaudeError {
     fn from(err: libloading::Error) -> Self {
         ClaudeError::Tool(err.to_string())
+    }
+}
+
+impl From<ConfigError> for ClaudeError {
+    fn from(err: ConfigError) -> Self {
+        ClaudeError::ConfigError(err)
     }
 }
