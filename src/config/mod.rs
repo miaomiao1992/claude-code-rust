@@ -80,6 +80,9 @@ pub struct Settings {
     /// 输出设置
     #[serde(default)]
     pub output: OutputSettings,
+    /// Daemon settings
+    #[serde(default)]
+    pub daemon: DaemonSettings,
 }
 
 fn default_version() -> String {
@@ -174,6 +177,33 @@ impl Default for OutputSettings {
     }
 }
 
+/// Daemon settings
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DaemonSettings {
+    /// Enable daemon mode
+    pub enabled: bool,
+    /// Socket path
+    pub socket_path: Option<String>,
+    /// PID file path
+    pub pid_file: Option<String>,
+    /// Auto start on system boot
+    pub auto_start: bool,
+    /// Log file path
+    pub log_file: Option<String>,
+}
+
+impl Default for DaemonSettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            socket_path: None,
+            pid_file: None,
+            auto_start: false,
+            log_file: None,
+        }
+    }
+}
+
 fn default_language() -> String {
     "en".to_string()
 }
@@ -214,6 +244,7 @@ impl Default for Settings {
             plugin_marketplace: PluginMarketplaceConfig::default(),
             feature_flags: FeatureFlags::default(),
             output: OutputSettings::default(),
+            daemon: DaemonSettings::default(),
         }
     }
 }
@@ -296,6 +327,12 @@ impl Settings {
             "features.coordinator_mode" => self.feature_flags.coordinator_mode = value.parse().unwrap_or(false),
             "features.fork_subagent" => self.feature_flags.fork_subagent = value.parse().unwrap_or(false),
             "features.buddy" => self.feature_flags.buddy = value.parse().unwrap_or(false),
+            // Daemon settings
+            "daemon.enabled" => self.daemon.enabled = value.parse().unwrap_or(false),
+            "daemon.socket_path" => self.daemon.socket_path = Some(value.to_string()),
+            "daemon.pid_file" => self.daemon.pid_file = Some(value.to_string()),
+            "daemon.auto_start" => self.daemon.auto_start = value.parse().unwrap_or(false),
+            "daemon.log_file" => self.daemon.log_file = Some(value.to_string()),
             // Plugin marketplace settings
             "plugin_marketplace.base_url" => self.plugin_marketplace.base_url = value.to_string(),
             "plugin_marketplace.api_key" => self.plugin_marketplace.api_key = Some(value.to_string()),

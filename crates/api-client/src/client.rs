@@ -7,20 +7,16 @@
 //! - 重试和错误处理
 
 use crate::error::{ApiError, Result};
-use crate::streaming::{StreamHandler, StreamResponse};
 use crate::tool_use::{ToolCall, ToolCallHandler, ToolResult};
 use crate::types::{
-    ApiContentBlock, ApiMessage, ApiModel, ApiRequest, ApiResponse, ApiTool, ApiUsage,
+    ApiContentBlock, ApiMessage, ApiModel, ApiRequest, ApiResponse, ApiTool,
     MessageContent, StreamEvent, ToolChoice,
 };
 use futures::{Stream, StreamExt};
-use reqwest::{Client, ClientBuilder, Response as ReqwestResponse};
-use serde::{de::DeserializeOwned, Serialize};
-use serde_json::Value;
+use reqwest::{Client, ClientBuilder};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::Mutex;
 
 /// API客户端配置
 #[derive(Debug, Clone)]

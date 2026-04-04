@@ -110,6 +110,38 @@ impl BuddyCommandExecutor {
                                 i += 1;
                             }
                         }
+                        "--tts" => {
+                            if i + 1 < args.len() {
+                                config.tts = args[i + 1].parse().ok();
+                                i += 2;
+                            } else {
+                                i += 1;
+                            }
+                        }
+                        "--voice" => {
+                            if i + 1 < args.len() {
+                                config.voice = Some(args[i + 1].clone());
+                                i += 2;
+                            } else {
+                                i += 1;
+                            }
+                        }
+                        "--volume" => {
+                            if i + 1 < args.len() {
+                                config.volume = args[i + 1].parse().ok();
+                                i += 2;
+                            } else {
+                                i += 1;
+                            }
+                        }
+                        "--speed" => {
+                            if i + 1 < args.len() {
+                                config.speed = args[i + 1].parse().ok();
+                                i += 2;
+                            } else {
+                                i += 1;
+                            }
+                        }
                         _ => i += 1,
                     }
                 }
@@ -148,6 +180,7 @@ impl BuddyCommandExecutor {
             }
             "list-personalities" => Some(BuddySubcommand::ListPersonalities),
             "list-sprites" => Some(BuddySubcommand::ListSprites),
+            "list-voices" => Some(BuddySubcommand::ListVoices),
             _ => None,
         }
     }
@@ -169,6 +202,7 @@ enum BuddySubcommand {
     Import(String),
     ListPersonalities,
     ListSprites,
+    ListVoices,
 }
 
 /// 配置选项
@@ -181,6 +215,10 @@ struct ConfigureOptions {
     sprite: Option<String>,
     animation: Option<bool>,
     notifications: Option<bool>,
+    tts: Option<bool>,
+    voice: Option<String>,
+    volume: Option<u8>,
+    speed: Option<f32>,
 }
 
 #[async_trait::async_trait]
@@ -249,6 +287,10 @@ impl CmdExecutor for BuddyCommandExecutor {
                      精灵类型: {}\n\
                      动画显示: {}\n\
                      通知: {}\n\
+                     TTS语音: {}\n\
+                     TTS音色: {}\n\
+                     TTS音量: {}%\n\
+                     TTS语速: {:.1}x\n\
                      对话消息数: {}\n                    ",
                     if config.enabled { "✅ 已启用" } else { "❌ 已禁用" },
                     state.description(),
@@ -259,6 +301,10 @@ impl CmdExecutor for BuddyCommandExecutor {
                     config.sprite_type.name(),
                     if config.show_animation { "开启" } else { "关闭" },
                     if config.enable_notifications { "开启" } else { "关闭" },
+                    if config.enable_tts { "✅ 已开启" } else { "❌ 已关闭" },
+                    config.tts_voice.display_name(),
+                    config.tts_volume,
+                    config.tts_speed,
                     history.message_count
                 );
 
@@ -345,10 +391,12 @@ impl CmdExecutor for BuddyCommandExecutor {
                         "robot" => SpriteType::Robot,
                         "alien" => SpriteType::Alien,
                         "ghost" => SpriteType::Ghost,
+                        "golden" => SpriteType::Golden,
+                        "gold" => SpriteType::Golden,
                         _ => {
                             return Ok(CommandResult {
                                 content: format!(
-                                    "未知的精灵类型: {}。可用类型: cat, dog, robot, alien, ghost",
+                                    "未知的精灵类型: {}。可用类型: cat, dog, robot, alien, ghost, golden",
                                     s
                                 ),
                                 ..Default::default()
@@ -367,6 +415,43 @@ impl CmdExecutor for BuddyCommandExecutor {
                 if let Some(n) = options.notifications {
                     manager.config_mut().enable_notifications = n;
                     changes.push(format!("通知: {}", if n { "开启" } else { "关闭" }));
+                }
+
+                if let Some(t) = options.tts {
+                    manager.set_tts_enabled(t);
+                    changes.push(format!("TTS语音: {}", if t { "开启" } else { "关闭" }));
+                }
+
+                if let Some(v) = options.voice {
+                    let voice_type = match v.to_lowercase().as_str() {
+                        "female_soft" | "soft" => TtsVoice::FemaleSoft,
+                        "female_cheerful" | "cheerful" => TtsVoice::FemaleCheerful,
+                        "male_deep" | "deep" => TtsVoice::MaleDeep,
+                        "male_young" | "young" => TtsVoice::MaleYoung,
+                        "neutral" | "natural" => TtsVoice::NeutralNatural,
+                        "robot" => TtsVoice::Robot,
+                        _ => {
+                            return Ok(CommandResult {
+                                content: format!(
+                                    "未知的音色类型: {}。可用类型: female_soft, female_cheerful, male_deep, male_young, neutral, robot",
+                                    v
+                                ),
+                                ..Default::default()
+                            });
+                        }
+                    };
+                    manager.set_tts_voice(voice_type);
+                    changes.push(format!("TTS音色: {}", voice_type.display_name()));
+                }
+
+                if let Some(v) = options.volume {
+                    manager.set_tts_volume(v);
+                    changes.push(format!("TTS音量: {}%", v));
+                }
+
+                if let Some(s) = options.speed {
+                    manager.set_tts_speed(s);
+                    changes.push(format!("TTS语速: {:.1}x", s));
                 }
 
                 if changes.is_empty() {
@@ -532,12 +617,35 @@ impl CmdExecutor for BuddyCommandExecutor {
                     ("robot", "机器人", SpriteType::Robot),
                     ("alien", "外星人", SpriteType::Alien),
                     ("ghost", "小幽灵", SpriteType::Ghost),
+                    ("golden", "金色传说 ✨", SpriteType::Golden),
                 ];
 
                 let mut output = String::from("🎨 可用精灵类型:\n\n");
                 for (id, name, sprite_type) in sprites {
                     output.push_str(&format!("  {} - {}\n{}\n", id, name, sprite_type.ascii_art()));
                 }
+
+                Ok(CommandResult {
+                    content: output,
+                    ..Default::default()
+                })
+            }
+
+            BuddySubcommand::ListVoices => {
+                let voices = vec![
+                    ("female_soft (soft)", "女声-温柔", TtsVoice::FemaleSoft),
+                    ("female_cheerful (cheerful)", "女声-活泼", TtsVoice::FemaleCheerful),
+                    ("male_deep (deep)", "男声-沉稳", TtsVoice::MaleDeep),
+                    ("male_young (young)", "男声-年轻", TtsVoice::MaleYoung),
+                    ("neutral (natural)", "中性-自然", TtsVoice::NeutralNatural),
+                    ("robot", "机器人", TtsVoice::Robot),
+                ];
+
+                let mut output = String::from("🔊 可用 TTS 音色:\n\n");
+                for (id, name, _voice_type) in voices {
+                    output.push_str(&format!("  {} - {}\n", id, name));
+                }
+                output.push_str("\n示例: /buddy configure --voice female_soft");
 
                 Ok(CommandResult {
                     content: output,
@@ -588,9 +696,13 @@ impl BuddyCommandExecutor {
     --personality, -p <类型> 设置性格 (friendly, professional, humorous, concise, mentoring, buddy)
     --style, -s <风格>      设置对话风格 (formal, casual, semiformal)
     --frequency, -f <频率>  设置主动提示频率 (never, rare, normal, frequent, veryfrequent)
-    --sprite <类型>         设置精灵类型 (cat, dog, robot, alien, ghost)
+    --sprite <类型>         设置精灵类型 (cat, dog, robot, alien, ghost, golden)
     --animation <true/false> 启用/禁用动画
     --notifications <true/false> 启用/禁用通知
+    --tts <true/false>      启用/禁用 TTS 语音
+    --voice <音色>          设置 TTS 音色 (female_soft, female_cheerful, male_deep, male_young, neutral, robot)
+    --volume <0-100>        设置 TTS 音量 (默认 80)
+    --speed <0.5-2.0>       设置 TTS 语速 (默认 1.0)
   show                      显示 Buddy 精灵
   chat <消息>               与 Buddy 对话
   greet                     显示问候语
@@ -600,6 +712,7 @@ impl BuddyCommandExecutor {
   import <路径>             导入配置
   list-personalities        列出性格类型
   list-sprites              列出精灵类型
+  list-voices               列出 TTS 音色
 
 示例:
   /buddy enable

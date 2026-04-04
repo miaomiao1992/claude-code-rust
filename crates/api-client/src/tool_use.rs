@@ -359,7 +359,7 @@ pub mod utils {
     /// 验证工具调用输入
     pub fn validate_tool_input(
         tool_call: &ToolCall,
-        schema: &Value,
+        _schema: &Value,
     ) -> Result<()> {
         // 这里可以添加JSON Schema验证
         // 暂时只检查是否为有效JSON

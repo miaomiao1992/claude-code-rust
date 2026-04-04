@@ -4,9 +4,8 @@
 
 use crate::error::Result;
 use crate::tool_use::{ToolCall, ToolCallHandler, ToolDefinition, ToolResult};
-use crate::types::{ApiTool, ApiContentBlock, MessageContent};
+use crate::types::{ApiTool, ApiContentBlock};
 use serde_json::Value;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 /// 工具到API工具的转换器

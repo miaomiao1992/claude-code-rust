@@ -9,7 +9,7 @@
 use crate::error::{ApiError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 /// OAuth客户端
 #[derive(Debug, Clone)]
@@ -93,8 +93,8 @@ pub struct OAuthToken {
     /// 作用域
     pub scope: Option<String>,
     /// 获取时间
-    #[serde(skip)]
-    pub obtained_at: SystemTime,
+    #[serde(default, skip_serializing)]
+    pub obtained_at: Option<SystemTime>,
 }
 
 impl OAuthToken {
@@ -110,7 +110,7 @@ impl OAuthToken {
             token_type: token_type.into(),
             expires_in,
             scope: None,
-            obtained_at: SystemTime::now(),
+            obtained_at: Some(SystemTime::now()),
         }
     }
 
@@ -128,8 +128,12 @@ impl OAuthToken {
 
     /// 检查是否过期
     pub fn is_expired(&self) -> bool {
+        // 如果没有获取时间，认为已过期
+        let Some(obtained_at) = self.obtained_at else {
+            return true;
+        };
         let elapsed = SystemTime::now()
-            .duration_since(self.obtained_at)
+            .duration_since(obtained_at)
             .unwrap_or_default();
         elapsed.as_secs() >= self.expires_in.saturating_sub(60) // 提前60秒刷新
     }
@@ -147,7 +151,7 @@ impl OAuthToken {
             token_type: response.token_type.unwrap_or_else(|| "Bearer".to_string()),
             expires_in: response.expires_in.unwrap_or(3600),
             scope: response.scope,
-            obtained_at: SystemTime::now(),
+            obtained_at: Some(SystemTime::now()),
         }
     }
 }
@@ -210,7 +214,7 @@ impl OAuthClient {
         let token_response: TokenResponse = response
             .json()
             .await
-            .map_err(|e| ApiError::serialization(e))?;
+            .map_err(|e| ApiError::network(e))?;
 
         let token = OAuthToken::from_response(token_response);
         self.token = Some(token);
@@ -259,7 +263,7 @@ impl OAuthClient {
         let token_response: TokenResponse = response
             .json()
             .await
-            .map_err(|e| ApiError::serialization(e))?;
+            .map_err(|e| ApiError::network(e))?;
 
         let token = OAuthToken::from_response(token_response);
         self.token = Some(token);

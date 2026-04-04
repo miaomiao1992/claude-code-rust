@@ -6,8 +6,10 @@
 //! - 智能压缩策略
 //! - 压缩历史管理
 
+use api_client::{ApiClient, ApiMessage, ApiRole, MessageContent};
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
+use std::sync::Arc;
 
 /// 压缩配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,7 +75,7 @@ impl Compactor {
         Self { config }
     }
 
-    /// 压缩消息
+    /// 压缩消息（同步版本，不使用AI摘要）
     pub fn compact(&self, messages: &mut VecDeque<CompactMessage>) -> CompactResult {
         if !self.config.enabled || messages.len() <= self.config.keep_messages {
             return CompactResult {
@@ -168,6 +170,110 @@ impl Compactor {
             messages.len(),
             user_messages.len()
         )
+    }
+
+    /// 异步压缩消息（使用 AI 生成摘要）
+    pub async fn compact_async(
+        &self,
+        messages: &mut VecDeque<CompactMessage>,
+        api_client: Arc<ApiClient>,
+    ) -> crate::error::Result<CompactResult> {
+        if !self.config.enabled || messages.len() <= self.config.keep_messages {
+            return Ok(CompactResult {
+                original_count: messages.len(),
+                compacted_count: messages.len(),
+                removed_count: 0,
+                summary: None,
+            });
+        }
+
+        let original_count = messages.len();
+
+        match self.config.strategy {
+            CompressionStrategy::Truncate => self.truncate(messages),
+            CompressionStrategy::Summarize => {
+                // 使用 AI 生成摘要
+                let keep_recent = self.config.keep_messages / 2;
+                let old_messages: Vec<_> = messages
+                    .drain(0..messages.len().saturating_sub(keep_recent))
+                    .collect();
+
+                if !old_messages.is_empty() {
+                    let summary = self.generate_summary_async(&old_messages, api_client).await?;
+                    messages.push_front(CompactMessage {
+                        role: "system".to_string(),
+                        content: format!("[Previous conversation summary]: {}", summary),
+                        timestamp: old_messages.last().map(|m| m.timestamp).unwrap_or_default(),
+                    });
+                }
+            }
+            CompressionStrategy::Smart => {
+                let total_length: usize = messages.iter().map(|m| m.content.len()).sum();
+
+                if total_length > self.config.max_context_length {
+                    // 如果上下文过长，使用摘要策略
+                    let keep_recent = self.config.keep_messages / 2;
+                    let old_messages: Vec<_> = messages
+                        .drain(0..messages.len().saturating_sub(keep_recent))
+                        .collect();
+
+                    if !old_messages.is_empty() {
+                        let summary = self.generate_summary_async(&old_messages, api_client).await?;
+                        messages.push_front(CompactMessage {
+                            role: "system".to_string(),
+                            content: format!("[Previous conversation summary]: {}", summary),
+                            timestamp: old_messages.last().map(|m| m.timestamp).unwrap_or_default(),
+                        });
+                    }
+                } else if messages.len() > self.config.keep_messages * 2 {
+                    // 如果消息数过多，使用保留最近策略
+                    self.keep_recent(messages);
+                }
+            }
+            CompressionStrategy::KeepRecent => self.keep_recent(messages),
+        }
+
+        Ok(CompactResult {
+            original_count,
+            compacted_count: messages.len(),
+            removed_count: original_count - messages.len(),
+            summary: None,
+        })
+    }
+
+    /// 异步生成摘要（使用 AI）
+    async fn generate_summary_async(
+        &self,
+        messages: &[CompactMessage],
+        api_client: Arc<ApiClient>,
+    ) -> crate::error::Result<String> {
+        // 构建压缩提示
+        let mut message_content = String::new();
+        message_content.push_str("Please compress the following conversation history into a concise summary.\n");
+        message_content.push_str("Preserve all key information, decisions, and important context.\n");
+        message_content.push_str("Remove redundant details but keep all critical information.\n\n");
+        message_content.push_str("--- Conversation to compress ---\n");
+
+        for msg in messages {
+            message_content.push_str(&format!("[{}]: {}\n\n", msg.role, msg.content));
+        }
+
+        message_content.push_str("--- End of conversation ---\n\n");
+        message_content.push_str("Provide a concise summary:");
+
+        // 调用 API 生成摘要
+        let request = ApiMessage {
+            role: ApiRole::User,
+            content: MessageContent::Text(message_content),
+        };
+
+        let model = api_client::types::ApiModel::Claude35Haiku20241022;
+        let response = api_client
+            .send_message(&message_content, Some(model))
+            .await
+            .map_err(|e| crate::error::Error::Other(format!("Failed to generate summary: {}", e)))?;
+
+        Ok(response.trim().to_string())
     }
 
     /// 检查是否需要压缩

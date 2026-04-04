@@ -1,8 +1,10 @@
 //! 分叉代理机制
-//! 
+//!
 //! 这个模块实现了分叉代理功能，对应 TypeScript 的 utils/forkedAgent.ts
 
 use crate::error::Result;
+use crate::tools::ToolManager;
+use api_client::{ApiClient, ApiMessage, ApiRole, MessageContent, ApiTool};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -212,17 +214,29 @@ impl TokenUsage {
 pub struct ForkedAgent {
     /// 参数
     params: ForkedAgentParams,
-    
+
     /// 是否已运行
     has_run: Arc<RwLock<bool>>,
+
+    /// API 客户端
+    api_client: Arc<ApiClient>,
+
+    /// 工具管理器
+    tool_manager: Arc<ToolManager>,
 }
 
 impl ForkedAgent {
     /// 创建新的分叉代理
-    pub fn new(params: ForkedAgentParams) -> Self {
+    pub fn new(
+        params: ForkedAgentParams,
+        api_client: Arc<ApiClient>,
+        tool_manager: Arc<ToolManager>,
+    ) -> Self {
         Self {
             params,
             has_run: Arc::new(RwLock::new(false)),
+            api_client,
+            tool_manager,
         }
     }
     
@@ -231,21 +245,109 @@ impl ForkedAgent {
         if *self.has_run.read().await {
             return Err(crate::error::ClaudeError::Agent("Agent already run".to_string()));
         }
-        
+
         *self.has_run.write().await = true;
-        
-        // TODO: 实现实际的分叉代理逻辑
-        // 1. 准备上下文
-        // 2. 调用 API
-        // 3. 处理响应
-        // 4. 累计使用量
-        
-        // 模拟执行
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-        
+
+        // 构建消息列表
+        let mut messages = Vec::new();
+
+        // 添加系统提示（来自缓存安全参数）
+        let system_prompt = &self.params.cache_safe_params.system_prompt;
+        if !system_prompt.is_empty() {
+            messages.push(ApiMessage {
+                role: ApiRole::User,
+                content: MessageContent::Text(system_prompt.clone()),
+            });
+        }
+
+        // 添加提示消息
+        for prompt in &self.params.prompt_messages {
+            messages.push(ApiMessage {
+                role: ApiRole::User,
+                content: MessageContent::Text(prompt.clone()),
+            });
+        }
+
+        // 获取工具集 - 根据权限检查确定允许的工具
+        // 对于分叉代理，我们使用 can_use_tool 过滤工具
+        let allowed_tools: Vec<String> = if self.params.can_use_tool.is_empty() {
+            // 如果没有指定权限检查，使用默认的所有工具
+            self.tool_manager
+                .registry()
+                .list_tools()
+                .await
+                .into_iter()
+                .map(|t| t.name().to_string())
+                .collect()
+        } else {
+            // TODO: 根据 can_use_tool 过滤
+            // 目前返回所有工具
+            self.tool_manager
+                .registry()
+                .list_tools()
+                .await
+                .into_iter()
+                .map(|t| t.name().to_string())
+                .collect()
+        };
+
+        let mut api_tools = Vec::new();
+        let registry = self.tool_manager.registry();
+        for tool_name in allowed_tools {
+            if let Some(tool) = registry.get_tool(&tool_name).await {
+                let api_tool = ApiTool {
+                    name: tool.name().to_string(),
+                    description: tool.description().map(|d| d.to_string()),
+                    input_schema: tool.input_schema(),
+                };
+                api_tools.push(api_tool);
+            }
+        }
+
+        // 获取工具调用处理器
+        let tool_handler = self.tool_manager.tool_call_handler();
+
+        // 执行工具调用循环
+        let max_iterations = self.params.max_turns.unwrap_or(10);
+        let model = api_client::types::ApiModel::Claude35Sonnet20241022;
+
+        let messages_result = self.api_client
+            .execute_with_tools(
+                messages,
+                api_tools,
+                tool_handler,
+                Some(model),
+                max_iterations,
+            )
+            .await?;
+
+        // 收集输出消息
+        let output_messages: Vec<String> = messages_result
+            .iter()
+            .filter(|msg| msg.role == ApiRole::Assistant)
+            .filter_map(|msg| match &msg.content {
+                MessageContent::Text(text) => Some(text.clone()),
+                MessageContent::Blocks(blocks) => {
+                    let texts: Vec<String> = blocks
+                        .iter()
+                        .filter_map(|block| match block {
+                            api_client::types::ApiContentBlock::Text { text } => {
+                                Some(text.clone())
+                            }
+                            _ => None,
+                        })
+                        .collect();
+                    Some(texts.join("\n"))
+                }
+            })
+            .collect();
+
+        // TODO: 从每个 API 响应累积实际 token 使用量
+        let mut total_usage = TokenUsage::new();
+
         Ok(ForkedAgentResult {
-            messages: self.params.prompt_messages.clone(),
-            total_usage: TokenUsage::new(),
+            messages: output_messages,
+            total_usage,
         })
     }
 }

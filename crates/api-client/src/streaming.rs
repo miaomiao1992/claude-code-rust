@@ -7,7 +7,7 @@
 //! - 错误处理
 
 use crate::error::Result;
-use crate::types::{ApiContentBlock, StreamEvent, ToolCall};
+use crate::types::{StreamEvent, ToolCall};
 use async_stream::stream;
 use futures::{Stream, StreamExt};
 use serde_json::Value;
