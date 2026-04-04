@@ -5,7 +5,8 @@
 [![GitHub release](https://img.shields.io/github/v/release/lorryjovens-hub/claude-code-rust)](https://github.com/lorryjovens-hub/claude-code-rust/releases)
 
 **Claude Code Rust** 是 Claude Code 的高性能 Rust 重构版本，提供原版 TypeScript 版本的所有核心功能，并在性能、内存安全和部署体积上实现显著优化。
-![Uploading c56bf574e6ccbaf8b224e81c2800c8a1.png…]()
+
+<img width="3840" height="2088" alt="c56bf574e6ccbaf8b224e81c2800c8a1" src="https://github.com/user-attachments/assets/bf25f74f-3665-4cc6-8d96-01de0c715b5f" />
 
 ## ✨ 主要特性
 
