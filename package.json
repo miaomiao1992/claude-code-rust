@@ -1,0 +1,62 @@
+{
+  "name": "claude-code-rust",
+  "version": "0.1.0",
+  "description": "Claude Code Rust implementation - AI-powered coding assistant",
+  "license": "MIT",
+  "author": "Claude Code Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lorryjovens-hub/claude-code-rust.git"
+  },
+  "homepage": "https://github.com/lorryjovens-hub/claude-code-rust",
+  "bugs": {
+    "url": "https://github.com/lorryjovens-hub/claude-code-rust/issues"
+  },
+  "keywords": [
+    "claude",
+    "code",
+    "ai",
+    "assistant",
+    "coding",
+    "rust",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "dist/index.js",
+  "bin": {
+    "claude": "./bin/claude",
+    "claude-code": "./bin/claude"
+  },
+  "scripts": {
+    "version": "node scripts/version.js",
+    "build": "cargo build --release && node scripts/build.js",
+    "build:dev": "cargo build && node scripts/build.js --dev",
+    "test": "cargo test && npm run test:js",
+    "test:js": "node scripts/test.js",
+    "lint": "cargo clippy -- -D warnings",
+    "fmt": "cargo fmt --all",
+    "clean": "cargo clean && rm -rf dist bin",
+    "prepublishOnly": "npm run build && npm test",
+    "publish:npm": "npm publish --access public",
+    "publish:github": "node scripts/publish-github.js",
+    "release": "npm run version && npm run build && npm run publish:npm && npm run publish:github"
+  },
+  "devDependencies": {
+    "semver": "^7.6.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "optionalDependencies": {},
+  "dependencies": {}
+}
