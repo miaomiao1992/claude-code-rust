@@ -1,36 +1,20 @@
-# Claude Code Rust
-截止2026/4/4/15:00,已完成
+# Claude Code Rust - 高性能 Rust 实现版本
 
-<img width="987" height="1148" alt="99fad6ef0560b6ce14658ad0e285af27" src="https://github.com/user-attachments/assets/ddc1ac34-b3b8-44ed-a484-3d463c9470bb" />
+[![Rust](https://img.shields.io/badge/rust-1.70%2B-blue.svg)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/v/release/lorryjovens-hub/claude-code-rust)](https://github.com/lorryjovens-hub/claude-code-rust/releases)
 
-<img width="1044" height="1179" alt="c482bd552ec72bde4d73d3b0e9845e26" src="https://github.com/user-attachments/assets/704fa264-8159-4025-9079-c41bd133b03c" />
+**Claude Code Rust** 是 Claude Code 的高性能 Rust 重构版本，提供原版 TypeScript 版本的所有核心功能，并在性能、内存安全和部署体积上实现显著优化。
 
+## ✨ 主要特性
 
-兄弟们今天也是我狂肝花了3个通宵的时间肝出来的，截止2026.4.3.12点，根据rust版本的CC统计也是已经完成了15000行rust源码，和14万+总代码行数
-这是中国国内首个claude code 的 rust语言重构包，考虑到原版TS源代码的封号和后门问题，我已经在重构的过程中剔除掉了部分限制!
-<img width="3840" height="2088" alt="2561d18937db04132ae9c747df0d3339" src="https://github.com/user-attachments/assets/7a4c33dc-e0a1-44bb-9554-8e2c1a265e16" />
-<img width="2583" height="2052" alt="741417f9032ae530d98614f1533713ba" src="https://github.com/user-attachments/assets/47d2f37f-63bb-4d5e-b05e-197f9e5158c5" />
-
-
-
-现在已经基本完成了大部分的功能构建。感谢兄弟们大力支持！！！具体情况可以关注B站：lorry黄同学   需要源码的万字分析文档的可以看我飞书：https://my.feishu.cn/wiki/GfQGwIen9izVnikrchFcKOtOnTb,
-
-让我们一起为中国开源模型迭代添砖加瓦！
- 
- <img width="992" height="1686" alt="19cae27474ae2bfd242d3965dd85cfdb" src="https://github.com/user-attachments/assets/c2880b38-5876-43f5-a0c7-33684497499c" />
-
- 该项目包含 typescript源码
-🚀 Anthropic Claude Code 的 Rust 全量重构版本 - 性能提升 2.5x，体积减少 97%，零依赖原生安全
-
-## 项目概述
-
-这是一个从零开始用 Rust 完整重构的 Claude Code 工具链，在保持 100% 功能兼容性的同时：
-
-- ⚡ **性能革命**：启动速度快 2.5 倍，命令执行快 25 倍
-- 📦 **轻量级**：从 164MB 减少到仅 5MB，部署体积减少 97%
-- 🔒 **内存安全**：Rust 编译器保证零运行时安全隐患
-- 🚀 **开箱即用**：单文件分发，无需任何依赖安装
-- 🏗️ **完整功能**：CLI、REPL、MCP 服务、插件系统一应俱全
+- ⚡ **卓越性能**：基于 Rust 的高性能实现，启动速度和执行效率大幅提升
+- 🛡️ **内存安全**：Rust 的所有权系统保证零运行时内存错误
+- 📦 **轻量部署**：单文件可执行程序，无需 Node.js 运行时环境
+- 🔧 **完整功能**：支持 CLI、REPL、GUI、插件系统等核心功能
+- 🌐 **多语言支持**：内置国际化系统，支持中英文界面
+- 🔌 **插件架构**：模块化设计，支持动态加载第三方插件
+- 🎯 **DCC 工具集成**：支持 Blender、UE5 等数字内容创建工具
 
 ## 性能基准数据对比
 
@@ -74,95 +58,104 @@
 | 垃圾回收暂停 | 0ms (无 GC) | ~50-200ms | 完全消除 |
 | 线程开销 | 极低 | 100+ MB (Node 多线程) | 无显著开销 |
 
-## 核心功能
+## 🚀 核心功能
 
 ### 1. 命令行界面 (CLI)
-- 单次查询执行
-- REPL 交互模式
-- 配置管理
-- 帮助信息
+- **交互式 REPL**：支持多行输入和命令历史
+- **命令系统**：内置 `help`、`version`、`config`、`login` 等命令
+- **查询执行**：支持单次查询和批处理模式
+- **Git 集成**：内置 Git 命令支持（commit、push、PR 创建）
 
-### 2. MCP 服务
-- 模型上下文协议实现
-- 稳定的 WebSocket 通信
-- 心跳机制和断线重连
+### 2. 图形用户界面 (GUI)
+- **原生桌面应用**：基于 egui 的跨平台 GUI
+- **聊天界面**：实时对话和历史记录
+- **设置管理**：图形化配置界面
+- **主题支持**：深色/浅色主题切换
 
-### 3. 插件系统
-- 动态加载/卸载插件
-- 消息总线通信
-- 插件生命周期管理
-- 依赖管理
+### 3. 技能系统
+- **内置技能**：`help`、`version`、`config-check` 等基础技能
+- **技能加载**：支持动态加载和卸载技能模块
+- **权限控制**：细粒度的技能执行权限管理
 
-### 4. 语音输入功能
-- 实时语音转文本
-- 支持多种语音格式
-- 语音指令解析与执行
+### 4. 工具系统
+- **文件操作**：读取、编辑、写入文件
+- **代码搜索**：支持正则表达式和模式匹配
+- **系统命令**：安全的命令执行环境
+- **Git 工具**：版本控制操作支持
 
-### 5. API 客户端
-- RESTful API 设计
-- 完整的错误处理
-- 超时控制机制
-- 请求重试策略
-- 连接池管理
-- 数据压缩
+### 5. 插件架构
+- **动态加载**：运行时加载和卸载插件
+- **安全沙箱**：插件隔离执行环境
+- **DCC 工具**：Blender、UE5 等数字内容创建工具集成
+- **生命周期管理**：完整的插件生命周期支持
 
-### 6. 安全机制
-- 多层防护权限控制
-- 沙箱隔离执行环境
-- 全面的审计日志系统
+### 6. 国际化支持
+- **多语言界面**：支持中文和英文显示
+- **本地化文件**：基于 JSON 的翻译文件系统
+- **动态切换**：运行时语言切换支持
 
-### 7. 分析和统计
-- 性能监控
-- 指标收集
-- 数据可视化
+### 7. 配置管理系统
+- **分层配置**：全局、用户、项目级配置
+- **环境变量**：支持环境变量覆盖
+- **配置验证**：自动配置验证和错误提示
 
-## 技术架构
+## 🏗️ 技术架构
 
 ### 模块结构
 
+基于实际代码库的模块组织：
+
 ```
 src/
-├── agents/          # 代理系统
-├── api/             # API 客户端
-├── bridge/          # Bridge 远程控制
-├── commands/        # 命令系统
-├── daemon/          # 守护进程
-├── error/           # 错误处理
-├── features/        # 特性模块
-├── mcp/             # MCP 客户端
-├── performance/     # 性能优化
-├── plugins/         # 插件系统
-├── security/        # 安全机制
-├── services/        # 服务模块
-├── state/           # 状态管理
-├── tools/           # 工具系统
-├── utils/           # 工具函数
-├── voice/           # 语音输入
-├── lib.rs           # 库入口
-└── main.rs          # 主入口
+├── bootstrap/          # 启动引导和快速路径优化
+├── cli/               # 命令行接口和参数解析
+├── commands/          # 命令系统（auth、config、git、interactive 等）
+├── config/            # 配置管理系统和系统提示
+├── gui/               # 图形用户界面（egui 实现）
+├── i18n/              # 国际化支持系统
+├── tools/             # 工具系统（文件操作、搜索、Git 等）
+├── skills/            # 技能加载和执行系统
+├── plugins/           # 插件系统和安全沙箱
+├── services/          # 服务层（代理、语音、API 等）
+├── features/          # 特性模块（语音、协调器、工作流等）
+├── mcp/               # 模型上下文协议客户端
+├── security/          # 安全机制和权限控制
+├── utils/             # 工具函数和辅助模块
+├── memory/            # 记忆存储和会话管理
+├── web/               # Web 服务器和插件市场
+├── wasm/              # WebAssembly 支持模块
+├── crates/dcc-tools/  # DCC 工具集成（Blender、UE5）
+├── lib.rs             # 库入口点
+└── main.rs            # 主程序入口点
 ```
 
 ### 核心技术栈
 
-- **Rust**：现代系统编程语言，提供内存安全和高性能
-- **Tokio**：异步运行时，提供高性能的异步 I/O
-- **Reqwest**：HTTP 客户端，用于 API 调用
-- **Serde**：序列化/反序列化库
-- **Clap**：命令行参数解析
-- **WebSocket**：实时通信
-- **Libloading**：动态库加载（插件系统）
-- **Async-stream**：异步流处理
+- **Rust 语言**：现代系统编程语言，提供零成本抽象和内存安全保证
+- **Tokio**：异步运行时，支持高性能并发 I/O 操作
+- **Clap**：功能强大的命令行参数解析库
+- **Serde**：高效的序列化和反序列化框架
+- **Reqwest**：异步 HTTP 客户端，支持 API 调用
+- **Egui**：即时模式 GUI 库，用于构建原生桌面界面
+- **Ratatui**：终端用户界面库，支持 TUI 应用
+- **Axum**：Web 框架，用于构建插件市场和 API 服务
+- **SQLx**：异步 SQL 数据库工具包
+- **Tracing**：结构化日志记录和诊断框架
 
-## 安装步骤
+## 📦 安装与使用
+
+### 系统要求
+
+- **Rust 工具链**：1.70+ 版本
+- **Cargo**：Rust 包管理器
+- **Windows**：需要 Visual Studio 构建工具（MSVC）或 MinGW
+- **macOS/Linux**：标准开发环境
 
 ### 从源码编译
 
-1. **安装 Rust**
+1. **安装 Rust 工具链**
    ```bash
-   # Windows
-   winget install Rustlang.Rustup
-   
-   # macOS/Linux
+   # 使用 rustup 安装
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
@@ -174,258 +167,329 @@ src/
 
 3. **编译项目**
    ```bash
+   # 开发模式编译
+   cargo build
+   
+   # 发布模式编译（推荐）
    cargo build --release
    ```
 
-4. **运行可执行文件**
+4. **运行应用**
    ```bash
    # Windows
-   target\release\claude.exe
+   .\target\release\claude.exe
    
    # macOS/Linux
    ./target/release/claude
    ```
 
-### 从预编译二进制文件安装
+### Windows 构建说明
 
-1. 从 GitHub Releases 页面下载对应平台的二进制文件
-2. 添加到系统 PATH 环境变量
-3. 直接运行 `claude` 命令
+在 Windows 上编译可能需要 Visual Studio 构建工具或 MinGW 环境：
 
-## 使用指南
+```bash
+# 如果遇到 libz-sys 编译问题，可以尝试：
+set RUSTFLAGS=-C target-feature=+crt-static
+cargo build --release
+```
+
+### 预编译二进制文件
+
+可以从 [GitHub Releases](https://github.com/lorryjovens-hub/claude-code-rust/releases) 页面下载对应平台的预编译二进制文件。
+
+### 命令行配置（PowerShell）
+
+为了方便区分和使用两个版本，推荐使用 PowerShell 配置：
+
+#### 一键配置（推荐）
+
+```powershell
+# 1. 运行配置脚本
+.\scripts\setup-powershell.ps1
+
+# 2. 重新加载配置
+. $PROFILE
+
+# 3. 验证配置
+claude-rust --version
+claude-npm --version
+```
+
+#### 手动配置
+
+编辑 PowerShell 配置文件：
+
+```powershell
+# 打开配置文件
+notepad $PROFILE
+
+# 添加以下内容
+function claude-rust {
+    & "C:\迅雷下载\claude-code-rev-main\claude-code-rust\bin\claude.exe" @args
+}
+
+function claude-npm {
+    & "C:\Users\user\AppData\Roaming\npm\claude" @args
+}
+```
+
+详细配置说明请参考 [**INSTALL.md**](INSTALL.md)。
+
+## 🚀 快速开始
 
 ### 基本命令
 
 ```bash
-# 查看版本
+# 查看版本信息（明确标识为 Rust 版本）
 claude --version
+# 输出: 0.1.1 (Claude Code Rust - High-performance implementation)
 
-# 查看帮助
+# 查看帮助信息
 claude --help
 
-# 执行单次查询
-claude "Hello, world!"
-
-# 进入 REPL 模式
+# 进入交互式 REPL 模式
 claude
+# 或
+claude interactive
+
+# 执行单次查询
+claude query "请帮我分析这段代码"
+# 或使用简写
+claude q "你的问题"
 ```
 
 ### 配置管理
 
 ```bash
-# 查看配置
+# 查看当前配置
 claude config
 
-# 设置配置
-claude config set <key> <value>
+# 登录到 Claude API
+claude login
 
-# 重置配置
-claude config reset
+# 退出登录
+claude logout
+
+# 检查系统配置
+claude config-check
 ```
 
-### 插件管理
+### Git 集成命令
 
 ```bash
-# 列出已加载的插件
-claude plugins list
+# 提交更改并创建 PR
+claude git commit-push-pr "提交描述"
 
-# 加载插件
-claude plugins load <path>
-
-# 卸载插件
-claude plugins unload <name>
-
-# 启动插件
-claude plugins start <name>
-
-# 停止插件
-claude plugins stop <name>
-
-# 扫描插件
-claude plugins scan
+# 查看 Git 状态
+claude git status
 ```
 
-### 语音模式
+### 图形界面模式
 
 ```bash
-# 启用语音模式
-claude voice
+# 启动 GUI 桌面应用
+claude gui
 
-# 检查语音输入可用性
-claude voice check
+# 启动终端用户界面 (TUI)
+claude tui
 ```
 
-### MCP 服务
+### 技能系统
 
 ```bash
-# 启动 MCP 服务
-claude mcp start
+# 列出所有可用技能
+claude skills list
 
-# 停止 MCP 服务
-claude mcp stop
+# 执行帮助技能
+claude help
 
-# 查看 MCP 状态
-claude mcp status
+# 显示版本信息
+claude version
 ```
 
-## API 文档
+### 升级和更新
 
-### 主要模块 API
+```bash
+# 检查更新
+claude upgrade check
 
-#### 1. API 客户端
-
-```rust
-use claude_code_rs::api::client::ApiClient;
-
-let client = ApiClient::new("https://api.example.com")
-    .with_api_key("your-api-key")
-    .with_timeout(30)
-    .build();
-
-let response = client.get("/api/resource").await?;
+# 执行升级
+claude upgrade execute
 ```
 
-#### 2. 插件系统
+## 🔧 开发指南
 
-```rust
-use claude_code_rs::plugins::manager::PluginManager;
+### 项目结构概述
 
-let manager = PluginManager::new();
-manager.load_plugin("path/to/plugin.so").await?;
+Claude Code Rust 采用模块化架构设计，主要模块包括：
+
+- **`bootstrap/`**：启动引导、快速路径优化和宏配置系统
+- **`cli/`**：命令行接口、参数解析和 REPL 实现
+- **`commands/`**：命令系统，包括认证、配置、Git、交互式等命令
+- **`config/`**：配置管理、系统提示和环境设置
+- **`gui/`**：基于 egui 的图形用户界面
+- **`tools/`**：工具系统，提供文件操作、搜索、命令执行等能力
+- **`skills/`**：技能加载、注册和执行系统
+- **`plugins/`**：插件框架和安全沙箱机制
+
+### 扩展开发
+
+#### 添加新命令
+
+1. 在 `src/commands/` 目录下创建新的命令模块
+2. 实现 `CmdExecutor` trait
+3. 在命令注册系统中注册新命令
+
+#### 创建新技能
+
+1. 在 `src/skills/` 目录下创建技能模块
+2. 实现 `Skill` trait
+3. 在技能加载器中注册新技能
+
+#### 开发插件
+
+参考 `PLUGIN_DEVELOPMENT.md` 文档了解插件开发流程和 API。
+
+### 构建和测试
+
+```bash
+# 运行所有测试
+cargo test
+
+# 运行特定测试
+cargo test test_command_system
+
+# 代码质量检查
+cargo clippy -- -D warnings
+
+# 代码格式化
+cargo fmt
+
+# 构建文档
+cargo doc --open
 ```
 
-#### 3. 语音服务
+## 🤝 贡献指南
 
-```rust
-use claude_code_rs::voice::VoiceService;
+### 开发流程
 
-let service = VoiceService::new();
-let transcription = service.transcribe("path/to/audio.wav").await?;
+1. **Fork 仓库**：创建个人 fork
+2. **创建分支**：使用描述性的分支名称
+   ```bash
+   git checkout -b feat/add-new-command
+   ```
+
+3. **实现功能**：遵循项目代码规范
+4. **添加测试**：为新功能编写测试用例
+5. **提交更改**：使用规范的提交消息
+   ```
+   feat: 添加新的配置命令
+   fix: 修复登录认证问题
+   docs: 更新 README 文档
+   refactor: 重构命令执行器
+   ```
+
+6. **推送分支**：推送到您的 fork
+   ```bash
+   git push origin feat/add-new-command
+   ```
+
+7. **创建 PR**：在 GitHub 上创建 Pull Request
+
+### 代码规范
+
+- **命名约定**：使用蛇形命名法（snake_case）用于变量和函数，大驼峰命名法（PascalCase）用于类型
+- **错误处理**：使用 `anyhow::Result` 或自定义错误类型
+- **文档注释**：公共 API 必须包含文档注释
+- **测试覆盖**：新功能应包含单元测试和集成测试
+
+### 测试要求
+
+```bash
+# 运行完整的测试套件
+cargo test --all-features
+
+# 检查测试覆盖率
+cargo tarpaulin --ignore-tests --out html
+
+# 运行性能基准测试
+cargo bench
 ```
 
-## 贡献指南
+## 📄 许可证
 
-### 开发环境设置
+本项目采用 **MIT 许可证** - 详见 [LICENSE](LICENSE) 文件。
 
-1. **安装依赖**
-   ```bash
-   cargo install cargo-tarpaulin # 测试覆盖率
-   cargo install clippy # 代码质量检查
-   ```
+## 📊 性能优势
 
-2. **运行测试**
-   ```bash
-   cargo test
-   ```
+作为 Rust 重构版本，Claude Code Rust 在多个维度上提供显著性能改进：
 
-3. **检查代码质量**
-   ```bash
-   cargo clippy
-   ```
+### 启动性能
+- **冷启动时间**：毫秒级启动，无需 Node.js 运行时初始化
+- **热启动优化**：利用系统级缓存，实现极速启动
 
-4. **检查测试覆盖率**
-   ```bash
-   cargo tarpaulin --out html
-   ```
+### 资源效率
+- **内存占用**：原生二进制执行，内存开销显著降低
+- **部署体积**：单文件分发，无需庞大的 `node_modules` 目录
+- **CPU 利用率**：高效的异步运行时，更好的多核利用
 
-### 提交规范
+### 执行性能
+- **命令响应**：原生机器码执行，无解释器开销
+- **I/O 操作**：基于 Tokio 的高效异步 I/O
+- **并发处理**：无锁数据结构和高效的并发原语
 
-- 提交消息格式：`[类型] 描述`
-- 类型包括：feat（新功能）、fix（修复）、docs（文档）、style（样式）、refactor（重构）、test（测试）、chore（构建）
-- 保持提交消息简洁明了
+### 安全优势
+- **内存安全**：Rust 编译器保证零运行时内存错误
+- **线程安全**：编译时数据竞争检测
+- **沙箱隔离**：插件系统的安全执行环境
 
-## 许可证
+## 🔮 未来规划
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
+### 短期目标 (v0.2.0)
+- **完善插件系统**：提供更丰富的插件开发 API 和示例
+- **增强 DCC 集成**：深化 Blender 和 UE5 工具链集成
+- **改进 GUI 体验**：优化用户界面和交互流程
+- **扩展技能库**：添加更多实用技能和工具
 
-## 性能优化亮点
+### 中期目标 (v0.5.0)
+- **云同步功能**：配置和状态的跨设备同步
+- **团队协作**：多人协作和共享工作空间
+- **高级分析**：代码质量分析和性能洞察
+- **市场生态**：插件市场和技能商店
 
-1. **原生编译**：无 JIT 延迟，直接执行机器码
-2. **零运行时**：无需 Node.js/Bun 等依赖
-3. **快速启动**：60ms 内完成初始化
-4. **低内存占用**：仅占用 10MB 基础内存
-5. **无垃圾回收**：消除 GC 停顿，提供可预测的性能
+### 长期愿景 (v1.0.0)
+- **全平台支持**：移动端和嵌入式设备支持
+- **AI 模型集成**：本地 AI 模型和混合推理
+- **企业功能**：企业级部署和管理工具
+- **生态系统**：完整的开发者工具链生态
 
-## 详细性能对比分析
+## 📚 相关文档
 
-### 性能指标
+- [**PLUGIN_DEVELOPMENT.md**](PLUGIN_DEVELOPMENT.md) - 插件开发指南
+- [**ARCHITECTURE.md**](ARCHITECTURE.md) - 系统架构设计文档
+- [**PERFORMANCE_COMPARISON.md**](PERFORMANCE_COMPARISON.md) - 性能对比分析
+- [**CHANGELOG.md**](CHANGELOG.md) - 版本更新日志
+- [**CONTRIBUTING.md**](CONTRIBUTING.md) - 贡献者指南
 
-| 性能指标 | Rust 版本 | TypeScript 版本 | 改进倍数 |
-|----------|-----------|-----------------|----------|
-| 启动速度 | 63ms | 158ms | 2.5x ⚡ |
-| 体积大小 | 5MB | 164MB | 32x 📦 |
-| 内存占用 | 10MB | 100MB | 10x 💾 |
-| 配置查询 | 6ms | 150ms | 25x 🚀 |
-| 冷启动时间 | 58ms | 152ms | 2.6x ⚡ |
+## 🤔 常见问题
 
-### 测试场景
+### Q: Rust 版本与原版 TypeScript 版本有什么区别？
+A: Rust 版本提供更好的性能、内存安全和部署效率，同时保持了核心功能兼容性。界面会明确标识为 "Claude Code Rust"。
 
-- ✅ 启动 100 次：Rust 耗时 6.3 秒，TypeScript 耗时 15.8 秒
-- ✅ 并发 50 实例：Rust 占用 500MB，TypeScript 占用 5GB
-- ✅ 配置查询性能：Rust 6ms vs TypeScript 150ms （25x 差距）
-- ✅ 连续运行 72 小时无崩溃
-- ✅ 代码圈复杂度平均低于 10
-- ✅ 测试覆盖率不低于 85%
+### Q: 如何同时安装两个版本而不冲突？
+A: 建议使用不同的命令别名，如 `claude-rust` 和 `claude-npm`，具体配置方法参见安装部分。
 
-### 优势总结
+### Q: Windows 上构建失败怎么办？
+A: Windows 需要 Visual Studio 构建工具或 MinGW 环境，也可以直接下载预编译的二进制文件。
 
-**Rust 版本的主要优势：**
-- ⚡ **性能卓越**：启动速度快 2.5 倍，命令执行快 25 倍
-- 📦 **轻量部署**：从 164MB 减少到仅 5MB，部署体积减少 97%
-- 🔒 **内存安全**：Rust 编译器保证零运行时安全隐患
-- 🚀 **开箱即用**：单文件分发，无需任何依赖安装
-- 💾 **低内存占用**：仅占用 10MB 基础内存，10x 更轻
-- 🎯 **零 GC 暂停**：消除垃圾回收停顿，提供可预测的性能
+### Q: 插件是否与原版兼容？
+A: 插件系统设计为兼容原版插件架构，但可能需要适配器或重新编译。
 
-**TypeScript 版本的主要优势：**
-- 🌍 **生态丰富**：npm 生态系统庞大，第三方库众多
-- 🚀 **开发速度**：动态类型和快速迭代能力
-- 📚 **学习曲线**：相对 Rust 更易于学习和上手
-- 🔧 **工具链成熟**：构建工具和开发工具链成熟
+## 📞 支持与反馈
 
-### 适用场景
-
-**推荐使用 Rust 版本的场景：**
-- 🖥️ **高性能服务器**：需要低延迟、高并发的服务
-- 📱 **边缘设备**：资源受限的环境，如 IoT 设备
-- 🔐 **安全关键应用**：需要内存安全保证的场景
-- 🚀 **容器化部署**：追求最小镜像体积的场景
-- ⚡ **高频调用**：需要快速启动和响应的服务
-
-**推荐使用 TypeScript 版本的场景：**
-- 🌐 **Web 前端**：与前端技术栈集成
-- 📱 **Node.js 生态**：需要大量 npm 包的项目
-- 🏃 **快速原型**：需要快速开发和迭代的项目
-- 👥 **团队协作**：团队成员更熟悉 JavaScript/TypeScript
-- 📦 **现有项目**：已有 TypeScript 代码库的项目
-
-### 详细对比报告
-
-完整的性能对比分析报告请查看 [PERFORMANCE_COMPARISON.md](PERFORMANCE_COMPARISON.md) 文件。
-
-## 安全特性
-
-1. **内存安全**：Rust 的所有权系统保证零内存错误
-2. **沙箱隔离**：防止恶意代码执行
-3. **权限控制**：细粒度的权限管理
-4. **审计日志**：完整的操作记录
-
-## 测试场景
-
-- ✅ 启动 100 次：Rust 耗时 6.3 秒，TypeScript 耗时 15.8 秒
-- ✅ 并发 50 实例：Rust 占用 500MB，TypeScript 占用 5GB
-- ✅ 配置查询性能：Rust 6ms vs TypeScript 150ms （25x 差距）
-- ✅ 连续运行 72 小时无崩溃
-- ✅ 代码圈复杂度平均低于 10
-- ✅ 测试覆盖率不低于 85%
-
-## 未来规划
-
-1. **扩展插件生态**：提供更多官方插件
-2. **支持更多平台**：扩展到更多操作系统
-3. **增强 AI 能力**：集成更多 AI 模型
-4. **性能进一步优化**：持续提升执行速度
-5. **完善文档**：提供更详细的使用指南和 API 文档
+- **GitHub Issues**：[问题报告](https://github.com/lorryjovens-hub/claude-code-rust/issues)
+- **文档反馈**：[飞书文档](https://my.feishu.cn/wiki/GfQGwIen9izVnikrchFcKOtOnTb)
+- **社区交流**：B站关注 [lorry黄同学](https://space.bilibili.com/)
 
 ---
 
