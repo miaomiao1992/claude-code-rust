@@ -204,7 +204,7 @@ where
 pub fn exponential_backoff(attempt: u32) -> Duration {
     let base = Duration::from_millis(100);
     let max = Duration::from_secs(5);
-    let factor = 2.0;
+    let factor: f32 = 2.0;
 
     let backoff = base.as_secs_f32() * factor.powi(attempt as i32);
     let backoff = Duration::from_secs_f32(backoff);

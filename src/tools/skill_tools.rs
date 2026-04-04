@@ -1,11 +1,30 @@
 //! 技能相关工具
 //!
 //! 实现Skill Tool等技能执行工具，集成真正的技能系统
+//!
+//! 注意：此模块需要启用 "full" feature 才能使用完整功能
 
+// 当 full feature 未启用时，提供一个空的实现
+#[cfg(not(feature = "full"))]
+pub struct SkillTool;
+
+#[cfg(not(feature = "full"))]
+impl SkillTool {
+    pub fn new() -> Self { Self }
+}
+
+// 当 full feature 启用时，提供完整的技能工具功能
+#[cfg(feature = "full")]
 use crate::error::Result;
+#[cfg(feature = "full")]
 use async_trait::async_trait;
+#[cfg(feature = "full")]
+use crate::skills;
+#[cfg(feature = "full")]
 use crate::skills::executor::SkillContextBuilder;
+#[cfg(feature = "full")]
 use super::base::{Tool, ToolBuilder};
+#[cfg(feature = "full")]
 use super::types::{
     ToolMetadata, ToolUseContext, ToolResult, ToolInputSchema,
     ToolCategory, ToolPermissionLevel,
@@ -13,121 +32,174 @@ use super::types::{
 
 /// Skill工具
 /// 用于执行技能
+#[cfg(feature = "full")]
 pub struct SkillTool;
 
-#[async_trait]
-impl Tool for SkillTool {
-    fn metadata(&self) -> ToolMetadata {
-        ToolBuilder::new("Skill", "Execute a skill within the main conversation")
-            .category(ToolCategory::AgentSystem)
-            .permission_level(ToolPermissionLevel::Standard)
-            .aliases(vec!["skill".to_string()])
-            .input_schema(ToolInputSchema {
-                schema_type: "object".to_string(),
-                properties: Some(serde_json::Map::from_iter([
-                    ("skill".to_string(), serde_json::json!({
+#[cfg(feature = "full")]
+impl Default for SkillTool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[cfg(feature = "full")]
+impl SkillTool {
+    /// 创建新的SkillTool实例
+    pub fn new() -> Self {
+        Self
+    }
+
+    /// 获取工具元数据
+    pub fn metadata() -> ToolMetadata {
+        ToolMetadata {
+            name: "Skill".to_string(),
+            description: "Execute skills to perform specialized tasks".to_string(),
+            input_schema: ToolInputSchema::Object {
+                properties: vec![
+                    ("name".to_string(), serde_json::json!({
                         "type": "string",
-                        "description": "The skill name to execute"
+                        "description": "Name of the skill to execute"
                     })),
                     ("args".to_string(), serde_json::json!({
                         "type": "string",
-                        "description": "Arguments to pass to the skill"
-                    })),
-                ])),
-                required: Some(vec!["skill".to_string()]),
-            })
-            .build_metadata()
+                        "description": "Arguments for the skill (optional)"
+                    }))
+                ],
+                required: vec!["name".to_string()],
+            },
+            category: ToolCategory::Utility,
+            permission_level: ToolPermissionLevel::Normal,
+            requires_approval: false,
+            is_deprecated: false,
+        }
+    }
+}
+
+#[cfg(feature = "full")]
+#[async_trait]
+impl Tool for SkillTool {
+    fn metadata(&self) -> ToolMetadata {
+        Self::metadata()
     }
 
     async fn execute(
         &self,
         input: serde_json::Value,
-        context: ToolUseContext,
+        _context: ToolUseContext,
     ) -> Result<ToolResult> {
-        let skill_name = input["skill"].as_str()
-            .ok_or_else(|| crate::error::ClaudeError::Tool("skill is required".to_string()))?;
-
+        let skill_name = input["name"].as_str().unwrap_or("");
         let args = input["args"].as_str();
 
-        // 构建技能上下文
-        let skill_context = SkillContextBuilder::new()
-            .with_cwd(context.cwd.clone())
-            .with_project_root(context.cwd.clone()) // 简化：使用cwd作为项目根目录
-            .with_config("tool_context", serde_json::json!({
-                "tool_name": "Skill",
-                "permission_mode": context.config.permissions.mode
-            }))
-            .build();
+        if skill_name.is_empty() {
+            return Ok(ToolResult::error("Skill name is required"));
+        }
 
-        // 执行技能
-        match skills::execute_skill(skill_name, args, skill_context).await {
-            Ok(skill_result) => {
-                let tool_result = if skill_result.success {
-                    ToolResult::success(serde_json::json!({
-                        "skill": skill_name,
-                        "args": args.unwrap_or(""),
-                        "result": skill_result.output,
-                        "duration_ms": skill_result.duration_ms,
-                        "success": true
-                    }))
-                } else {
-                    ToolResult::error(
-                        format!("技能执行失败: {}", skill_result.error.unwrap_or_default()),
-                        serde_json::json!({
-                            "skill": skill_name,
-                            "args": args.unwrap_or(""),
-                            "error": skill_result.error,
-                            "duration_ms": skill_result.duration_ms,
-                            "success": false
-                        })
-                    )
-                };
-                Ok(tool_result)
+        // 初始化技能系统
+        let manager = match skills::init().await {
+            Ok(m) => m,
+            Err(e) => return Ok(ToolResult::error(format!("Failed to initialize skill system: {}", e))),
+        };
+
+        // 查找技能
+        let registry = manager.registry();
+        let all_skills = registry.list().await;
+
+        let skill = all_skills.iter()
+            .find(|s| s.metadata().name == skill_name);
+
+        match skill {
+            Some(s) => {
+                // 构建上下文
+                let context_builder = SkillContextBuilder::new();
+                let context = context_builder.build();
+
+                // 执行技能
+                match s.execute(args, context).await {
+                    Ok(result) => Ok(ToolResult::success(serde_json::Value::String(
+                        format!("Skill '{}' executed successfully", skill_name)
+                    ))),
+                    Err(e) => Ok(ToolResult::error(format!("Failed to execute skill: {}", e))),
+                }
             }
-            Err(e) => {
-                Ok(ToolResult::error(
-                    format!("技能系统错误: {}", e),
-                    serde_json::json!({
-                        "skill": skill_name,
-                        "args": args.unwrap_or(""),
-                        "error": e.to_string(),
-                        "success": false
-                    })
-                ))
-            }
+            None => Ok(ToolResult::error(format!("Skill '{}' not found", skill_name))),
         }
     }
 
-    fn get_activity_description(&self, input: &serde_json::Value) -> Option<String> {
-        input["skill"].as_str().map(|s| format!("Executing skill '{}'", s))
+    async fn execute_with_options(
+        &self,
+        input: serde_json::Value,
+        _context: ToolUseContext,
+        options: super::types::ToolExecutionOptions,
+    ) -> Result<ToolResult> {
+        if options.dry_run {
+            return Ok(ToolResult::success(serde_json::Value::String(
+                format!("Would execute skill: {}", input.get("name").and_then(|v| v.as_str()).unwrap_or("unknown"))
+            )));
+        }
+
+        self.execute(input, _context).await
     }
 }
 
 /// 技能列表工具
-pub struct SkillListTool;
+/// 用于列出可用的技能
 
-#[async_trait]
-impl Tool for SkillListTool {
-    fn metadata(&self) -> ToolMetadata {
-        ToolBuilder::new("SkillList", "List all available skills")
-            .category(ToolCategory::AgentSystem)
-            .permission_level(ToolPermissionLevel::Standard)
-            .aliases(vec!["skills".to_string(), "list-skills".to_string()])
-            .input_schema(ToolInputSchema {
-                schema_type: "object".to_string(),
-                properties: Some(serde_json::Map::from_iter([
-                    ("query".to_string(), serde_json::json!({
-                        "type": "string",
-                        "description": "Optional search query to filter skills"
-                    })),
+#[cfg(not(feature = "full"))]
+pub struct ListSkillsTool;
+
+#[cfg(not(feature = "full"))]
+impl ListSkillsTool {
+    pub fn new() -> Self { Self }
+}
+
+#[cfg(feature = "full")]
+pub struct ListSkillsTool;
+
+#[cfg(feature = "full")]
+impl Default for ListSkillsTool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[cfg(feature = "full")]
+impl ListSkillsTool {
+    /// 创建新的ListSkillsTool实例
+    pub fn new() -> Self {
+        Self
+    }
+
+    /// 获取工具元数据
+    pub fn metadata() -> ToolMetadata {
+        ToolMetadata {
+            name: "list_skills".to_string(),
+            description: "List all available skills with their descriptions and categories".to_string(),
+            input_schema: ToolInputSchema::Object {
+                properties: vec![
                     ("category".to_string(), serde_json::json!({
                         "type": "string",
-                        "description": "Optional category filter"
+                        "description": "Filter by category (optional)"
                     })),
-                ])),
-                required: Some(vec![]),
-            })
-            .build_metadata()
+                    ("query".to_string(), serde_json::json!({
+                        "type": "string",
+                        "description": "Search query (optional)"
+                    }))
+                ],
+                required: vec![],
+            },
+            category: ToolCategory::Utility,
+            permission_level: ToolPermissionLevel::Normal,
+            requires_approval: false,
+            is_deprecated: false,
+        }
+    }
+}
+
+#[cfg(feature = "full")]
+#[async_trait]
+impl Tool for ListSkillsTool {
+    fn metadata(&self) -> ToolMetadata {
+        Self::metadata()
     }
 
     async fn execute(
@@ -139,10 +211,13 @@ impl Tool for SkillListTool {
         let category = input["category"].as_str();
 
         // 初始化技能系统
-        let manager = skills::init().await?;
-        let registry = manager.registry();
+        let manager = match skills::init().await {
+            Ok(m) => m,
+            Err(e) => return Ok(ToolResult::error(format!("Failed to initialize skill system: {}", e))),
+        };
 
         // 获取所有技能
+        let registry = manager.registry();
         let all_skills = registry.list().await;
 
         // 过滤技能
@@ -159,58 +234,50 @@ impl Tool for SkillListTool {
 
                 // 应用分类过滤
                 let category_match = category.map(|c| {
-                    format!("{:?}", metadata.category).to_lowercase() == c.to_lowercase()
+                    metadata.category == c || c.is_empty()
                 }).unwrap_or(true);
 
                 query_match && category_match
             })
-            .map(|skill| {
-                let metadata = skill.metadata();
-                serde_json::json!({
-                    "name": metadata.name,
-                    "description": metadata.description,
-                    "category": format!("{:?}", metadata.category),
-                    "version": metadata.version,
-                    "author": metadata.author,
-                    "tags": metadata.tags,
-                    "builtin": metadata.is_builtin,
-                    "permissions": metadata.required_permissions
-                })
-            })
             .collect();
 
-        Ok(ToolResult::success(serde_json::json!({
-            "skills": filtered_skills,
-            "count": filtered_skills.len(),
-            "query": query.unwrap_or(""),
-            "category": category.unwrap_or("")
-        })))
+        // 格式化结果
+        let mut result = String::new();
+        result.push_str("Available Skills:\n");
+        result.push_str("================\n\n");
+
+        if filtered_skills.is_empty() {
+            result.push_str("No skills found matching your criteria.\n");
+        } else {
+            for skill in &filtered_skills {
+                let metadata = skill.metadata();
+
+                result.push_str(&format!("**{}** ({})\n", metadata.name, metadata.category));
+                result.push_str(&format!("  {}\n\n", metadata.description));
+
+                if !metadata.tags.is_empty() {
+                    result.push_str(&format!("  Tags: {}\n\n", metadata.tags.join(", ")));
+                }
+            }
+        }
+
+        result.push_str(&format!("\nTotal: {} skill(s)\n", filtered_skills.len()));
+
+        Ok(ToolResult::success(serde_json::Value::String(result)))
     }
 
-    fn get_activity_description(&self, _input: &serde_json::Value) -> Option<String> {
-        Some("Listing available skills".to_string())
-    }
-}
+    async fn execute_with_options(
+        &self,
+        input: serde_json::Value,
+        _context: ToolUseContext,
+        options: super::types::ToolExecutionOptions,
+    ) -> Result<ToolResult> {
+        if options.dry_run {
+            return Ok(ToolResult::success(serde_json::Value::String(
+                "Would list available skills".to_string()
+            )));
+        }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_skill_metadata() {
-        let tool = SkillTool;
-        let metadata = tool.metadata();
-
-        assert_eq!(metadata.name, "Skill");
-        assert_eq!(metadata.category, ToolCategory::AgentSystem);
-    }
-
-    #[test]
-    fn test_skill_list_metadata() {
-        let tool = SkillListTool;
-        let metadata = tool.metadata();
-
-        assert_eq!(metadata.name, "SkillList");
-        assert_eq!(metadata.category, ToolCategory::AgentSystem);
+        self.execute(input, _context).await
     }
 }

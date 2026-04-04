@@ -5,8 +5,9 @@
 use std::path::PathBuf;
 use std::fs;
 use crate::error::Result;
-use super::registry::{SkillLoader, SkillRegistry};
+use super::registry::SkillRegistry;
 use super::types::{Skill, SkillMetadata, SkillCategory, SkillContext, SkillResult};
+use super::registry::SkillLoader;
 
 /// 内置技能加载器
 pub struct BuiltinSkillLoader;
@@ -137,7 +138,7 @@ impl Skill for HelpSkill {
         }
     }
 
-    async fn execute(&self, args: Option<&str>, _context: SkillContext) -> Result<SkillResult, crate::error::ClaudeError> {
+    async fn execute(&self, args: Option<&str>, _context: SkillContext) -> Result<SkillResult> {
         let help_text = match args {
             Some("skills") => "可用技能:\n- help: 显示帮助信息\n- list-skills: 列出所有技能\n- version: 显示版本信息\n- config-check: 检查配置",
             Some("commands") => "可用命令:\n- /help: 显示帮助\n- /skills: 列出技能\n- /version: 显示版本\n- /config: 检查配置",
@@ -243,8 +244,8 @@ impl Skill for VersionSkill {
     async fn execute(&self, _args: Option<&str>, _context: SkillContext) -> Result<SkillResult, crate::error::ClaudeError> {
         let version_info = serde_json::json!({
             "claude_code_rust": env!("CARGO_PKG_VERSION"),
-            "rust_version": env!("RUST_VERSION"),
-            "build_time": env!("BUILD_TIMESTAMP"),
+            "rust_version": option_env!("RUSTC_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")),
+            "build_time": option_env!("BUILD_TIMESTAMP").unwrap_or(env!("CARGO_PKG_VERSION")),
             "skill_system": "1.0.0"
         });
 

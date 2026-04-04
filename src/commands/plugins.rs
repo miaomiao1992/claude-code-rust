@@ -2,12 +2,17 @@
 //! 
 //! 实现插件系统相关的命令处理
 
+#[cfg(feature = "full")]
 use crate::error::Result;
+#[cfg(feature = "full")]
 use crate::plugins::{Plugin, PluginManager};
+#[cfg(feature = "full")]
 use crate::state::AppState;
+#[cfg(feature = "full")]
 use std::path::PathBuf;
 
 /// 列出所有插件
+#[cfg(feature = "full")]
 pub async fn list_plugins(state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     let plugins: std::collections::HashMap<String, std::sync::Arc<tokio::sync::RwLock<Box<dyn Plugin>>>> = plugin_manager.get_all_plugins().await;
@@ -36,6 +41,7 @@ pub async fn list_plugins(state: AppState) -> Result<()> {
 }
 
 /// 加载插件
+#[cfg(feature = "full")]
 pub async fn load_plugin(path: String, state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     let plugin_path = PathBuf::from(path);
@@ -45,6 +51,7 @@ pub async fn load_plugin(path: String, state: AppState) -> Result<()> {
 }
 
 /// 卸载插件
+#[cfg(feature = "full")]
 pub async fn unload_plugin(name: String, state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     plugin_manager.unload_plugin(&name).await?;
@@ -53,6 +60,7 @@ pub async fn unload_plugin(name: String, state: AppState) -> Result<()> {
 }
 
 /// 启动插件
+#[cfg(feature = "full")]
 pub async fn start_plugin(name: String, state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     plugin_manager.start_plugin(&name).await?;
@@ -61,6 +69,7 @@ pub async fn start_plugin(name: String, state: AppState) -> Result<()> {
 }
 
 /// 停止插件
+#[cfg(feature = "full")]
 pub async fn stop_plugin(name: String, state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     plugin_manager.stop_plugin(&name).await?;
@@ -69,6 +78,7 @@ pub async fn stop_plugin(name: String, state: AppState) -> Result<()> {
 }
 
 /// 扫描插件
+#[cfg(feature = "full")]
 pub async fn scan_plugins(state: AppState) -> Result<()> {
     let plugin_manager = PluginManager::new();
     let plugins: Vec<std::path::PathBuf> = plugin_manager.scan_plugins().await?;
@@ -88,8 +98,51 @@ pub async fn scan_plugins(state: AppState) -> Result<()> {
 }
 
 /// 注册插件相关的命令
+#[cfg(feature = "full")]
 pub fn register_plugin_commands(manager: &mut crate::commands::registry::CommandManager) {
     // 这里应该注册插件相关的命令
+}
+
+// 简化版本的函数（当full feature未启用时）
+#[cfg(not(feature = "full"))]
+pub async fn list_plugins(_state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub async fn load_plugin(_path: String, _state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub async fn unload_plugin(_name: String, _state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub async fn start_plugin(_name: String, _state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub async fn stop_plugin(_name: String, _state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub async fn scan_plugins(_state: crate::state::AppState) -> crate::error::Result<()> {
+    println!("Plugin commands are not available in this build. Use --features full to enable them.");
+    Ok(())
+}
+
+#[cfg(not(feature = "full"))]
+pub fn register_plugin_commands(_manager: &mut crate::commands::registry::CommandManager) {
+    // 插件命令在此构建中不可用
 }
 
 #[cfg(test)]

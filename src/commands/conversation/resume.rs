@@ -35,7 +35,7 @@ impl CommandExecutor for ResumeCommand {
         }
 
         // 如果有指定对话ID或名称，尝试加载
-        let selected_conversation = if let Some(query) = args.query {
+        let selected_conversation = if let Some(ref query) = args.query {
             find_conversation(&conversations, &query)
         } else {
             // 默认选择最近的对话
@@ -173,7 +173,7 @@ fn format_resume_result(
     result.push_str("\n### 最后几条消息 | Recent Messages\n\n");
 
     // 显示最后几条消息
-    let recent_messages = messages.iter().rev().take(5).collect::<Vec<_>();
+    let recent_messages = messages.iter().rev().take(5).collect::<Vec<_>>();
     for msg in recent_messages.iter().rev() {
         let role_emoji = match msg.role.as_str() {
             "user" => "👤",

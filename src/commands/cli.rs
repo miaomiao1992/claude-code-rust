@@ -8,9 +8,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crossterm::style::{Color, Colored, Print, ResetColor, SetForegroundColor};
-use crossterm::terminal;
-use crossterm::cursor;
+use crossterm::style::{Color, Print, ResetColor, SetForegroundColor};
 use crossterm::execute;
 use crate::error::Result;
 

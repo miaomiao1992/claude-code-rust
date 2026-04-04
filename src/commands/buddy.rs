@@ -6,7 +6,7 @@ use crate::commands::registry::CommandExecutor as CmdExecutor;
 use crate::commands::types::{Command, CommandBase, CommandContext, CommandResult, LocalCommand, LoadedFrom};
 use crate::error::Result;
 use crate::features::buddy::{
-    BuddyConfig, BuddyManager, BuddyPersonality, ConversationStyle, ProactiveFrequency, SpriteType,
+    BuddyConfig, BuddyManager, BuddyPersonality, ConversationStyle, ProactiveFrequency, SpriteType, TtsVoice,
 };
 use crate::state::AppState;
 use std::sync::Arc;

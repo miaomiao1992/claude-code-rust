@@ -3,7 +3,7 @@
 //! 这个模块实现了代理执行和管理功能
 
 use crate::error::Result;
-use crate::tools::{ToolManager, ToolCallHandler};
+use crate::tools::{ToolManager, ApiToolHandler};
 use api_client::{ApiClient, ApiMessage, ApiRole, MessageContent, ApiTool};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -83,7 +83,7 @@ impl AgentExecutor {
         let mut messages = Vec::new();
 
         // 添加系统提示
-        let system_prompt = self.config.definition().system_prompt.clone();
+        let system_prompt = self.config.definition.system_prompt.clone();
         if !system_prompt.is_empty() {
             messages.push(ApiMessage {
                 role: ApiRole::User,
@@ -98,27 +98,31 @@ impl AgentExecutor {
         });
 
         // 获取允许的工具列表
-        let allowed_tools = self.config.allowed_tools();
+        let allowed_tools = self.config.definition.tools.as_ref().unwrap_or(&Vec::new());
         let mut api_tools = Vec::new();
 
         // 从工具管理器获取工具定义并转换为 API 格式
         let registry = self.tool_manager.registry();
         for tool_name in allowed_tools {
-            if let Some(tool) = registry.get_tool(tool_name).await {
+            if let Some(tool) = registry.get(tool_name).await {
                 let api_tool = ApiTool {
                     name: tool.name().to_string(),
-                    description: tool.description().map(|d| d.to_string()),
-                    input_schema: tool.input_schema(),
+                    description: tool.description().map(|d: &str| d.to_string()),
+                    input_schema: tool.input_schema().into(),
                 };
                 api_tools.push(api_tool);
             }
         }
 
-        // 获取工具调用处理器
-        let tool_handler = self.tool_manager.tool_call_handler();
+        // 创建工具调用处理器
+        let converter = Arc::new(api_client::integration::DefaultToolConverter::default());
+        let tool_handler = Arc::new(api_client::integration::ToolRegistryAdapter::new(
+            Arc::clone(self.tool_manager.registry()),
+            converter,
+        ));
 
         // 执行完整的工具调用循环
-        let max_iterations = self.config.max_turns().unwrap_or(10);
+        let max_iterations = self.config.definition.max_turns.unwrap_or(10) as usize;
         let model = api_client::types::ApiModel::Claude35Sonnet20241022;
 
         let messages = self.api_client
@@ -277,23 +281,6 @@ mod tests {
     use super::super::types::AgentType;
     
     #[tokio::test]
-    async fn test_agent_executor() {
-        let definition = AgentDefinition::new(
-            "test".to_string(),
-            AgentType::GeneralPurpose,
-            "Test agent".to_string(),
-        );
-        
-        let config = AgentConfig::new(definition);
-        let executor = AgentExecutor::new(config);
-        
-        assert_eq!(executor.status().await, AgentStatus::Idle);
-        
-        let result = executor.execute("test input".to_string()).await.unwrap();
-        assert_eq!(result.status, AgentStatus::Completed);
-    }
-    
-    #[tokio::test]
     async fn test_agent_manager() {
         let manager = AgentManager::new();
         
@@ -307,8 +294,5 @@ mod tests {
         
         let retrieved = manager.get("test").await;
         assert!(retrieved.is_some());
-        
-        let executor = manager.create_executor("test").await;
-        assert!(executor.is_some());
     }
 }

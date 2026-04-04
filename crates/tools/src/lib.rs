@@ -19,6 +19,7 @@ pub mod skill_tools;
 pub mod message_tools;
 pub mod task_tools;
 pub mod plan_tools;
+#[cfg(feature = "git-worktree")]
 pub mod git_tools;
 pub mod user_tools;
 pub mod lsp_tools;
@@ -43,17 +44,7 @@ pub use permissions::{PermissionChecker, ModeChecker};
 pub use file_tools::{FileReadTool, FileEditTool, FileWriteTool};
 pub use search_tools::{GlobTool, GrepTool};
 pub use command_tools::{BashTool, PowerShellTool};
-pub use web_tools::{WebFetchTool, WebSearchTool};
-pub use skill_tools::SkillTool;
-pub use message_tools::SendMessageTool;
-pub use task_tools::TaskCreateTool;
-pub use plan_tools::{EnterPlanModeTool, ExitPlanModeTool};
-pub use git_tools::EnterWorktreeTool;
-pub use user_tools::AskUserQuestionTool;
-pub use lsp_tools::LSPTool;
 pub use time_tools::SleepTool;
-pub use cron_tools::CronCreateTool;
-pub use team_tools::TeamCreateTool;
 pub use tool_search::ToolSearchTool;
 
 use anyhow::Result;
@@ -101,38 +92,15 @@ impl ToolPreset {
                 "Glob".to_string(),
                 "Grep".to_string(),
                 "Bash".to_string(),
-                "WebFetch".to_string(),
-                "WebSearch".to_string(),
-                "Skill".to_string(),
-                "SendMessage".to_string(),
-                "TaskCreate".to_string(),
-                "EnterPlanMode".to_string(),
-                "ExitPlanMode".to_string(),
-                "EnterWorktree".to_string(),
-                "AskUserQuestion".to_string(),
-                "LSP".to_string(),
+                "PowerShell".to_string(),
                 "Sleep".to_string(),
-                "CronCreate".to_string(),
-                "TeamCreate".to_string(),
                 "ToolSearch".to_string(),
             ],
             ToolPreset::Simple => vec![
                 "Read".to_string(),
                 "Glob".to_string(),
                 "Grep".to_string(),
-                "WebFetch".to_string(),
-                "WebSearch".to_string(),
-                "Skill".to_string(),
-                "SendMessage".to_string(),
-                "TaskCreate".to_string(),
-                "EnterPlanMode".to_string(),
-                "ExitPlanMode".to_string(),
-                "EnterWorktree".to_string(),
-                "AskUserQuestion".to_string(),
-                "LSP".to_string(),
                 "Sleep".to_string(),
-                "CronCreate".to_string(),
-                "TeamCreate".to_string(),
                 "ToolSearch".to_string(),
             ],
             ToolPreset::Full => self::get_tool_names(),
@@ -150,19 +118,7 @@ pub fn get_tool_names() -> Vec<String> {
         "Grep".to_string(),
         "Bash".to_string(),
         "PowerShell".to_string(),
-        "WebFetch".to_string(),
-        "WebSearch".to_string(),
-        "Skill".to_string(),
-        "SendMessage".to_string(),
-        "TaskCreate".to_string(),
-        "EnterPlanMode".to_string(),
-        "ExitPlanMode".to_string(),
-        "EnterWorktree".to_string(),
-        "AskUserQuestion".to_string(),
-        "LSP".to_string(),
         "Sleep".to_string(),
-        "CronCreate".to_string(),
-        "TeamCreate".to_string(),
         "ToolSearch".to_string(),
     ]
 }
@@ -206,33 +162,11 @@ impl ToolLoader for BuiltinToolLoader {
         registry.register(BashTool).await;
         registry.register(PowerShellTool).await;
 
-        // 注册网络工具
-        registry.register(WebFetchTool::default()).await;
-        registry.register(WebSearchTool::default()).await;
-
         // 注册系统工具
-        registry.register(SkillTool).await;
-        registry.register(SendMessageTool).await;
-        registry.register(TaskCreateTool).await;
-        registry.register(EnterPlanModeTool).await;
-        registry.register(ExitPlanModeTool).await;
         registry.register(SleepTool).await;
-        registry.register(CronCreateTool).await;
         registry.register(ToolSearchTool).await;
 
-        // 注册Git工具
-        registry.register(EnterWorktreeTool).await;
-
-        // 注册用户交互工具
-        registry.register(AskUserQuestionTool).await;
-
-        // 注册开发工具
-        registry.register(LSPTool).await;
-
-        // 注册团队工具
-        registry.register(TeamCreateTool).await;
-
-        tracing::debug!("Loaded {} builtin tools", 21);
+        tracing::debug!("Loaded {} builtin tools", 9);
 
         Ok(())
     }

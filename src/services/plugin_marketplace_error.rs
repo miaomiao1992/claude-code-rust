@@ -67,6 +67,10 @@ pub enum PluginMarketplaceError {
     /// 限流错误
     #[error("API限流: {0}")]
     RateLimitError(String),
+
+    /// 其他错误
+    #[error("其他错误: {0}")]
+    Other(String),
 }
 
 /// 插件市场结果类型
@@ -90,6 +94,7 @@ impl From<PluginMarketplaceError> for ClaudeError {
             PluginMarketplaceError::PermissionError(msg) => ClaudeError::Permission(msg),
             PluginMarketplaceError::TimeoutError(msg) => ClaudeError::Other(format!("超时错误: {}", msg)),
             PluginMarketplaceError::RateLimitError(msg) => ClaudeError::Other(format!("API限流: {}", msg)),
+            PluginMarketplaceError::Other(msg) => ClaudeError::Other(msg),
         }
     }
 }
@@ -147,6 +152,7 @@ impl PluginMarketplaceError {
             PluginMarketplaceError::PermissionError(_) => "PERMISSION_ERROR",
             PluginMarketplaceError::TimeoutError(_) => "TIMEOUT_ERROR",
             PluginMarketplaceError::RateLimitError(_) => "RATE_LIMIT_ERROR",
+            PluginMarketplaceError::Other(_) => "OTHER_ERROR",
         }
     }
 
@@ -166,7 +172,7 @@ impl PluginMarketplaceError {
 impl PluginMarketplaceError {
     /// 从字符串创建其他错误
     pub fn other(msg: impl Into<String>) -> Self {
-        PluginMarketplaceError::ApiError(msg.into())
+        PluginMarketplaceError::Other(msg.into())
     }
 }
 

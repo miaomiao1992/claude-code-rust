@@ -18,6 +18,7 @@ pub mod skill_tools;
 pub mod message_tools;
 pub mod task_tools;
 pub mod plan_tools;
+#[cfg(feature = "git-worktree")]
 pub mod git_tools;
 pub mod user_tools;
 pub mod lsp_tools;
@@ -35,14 +36,21 @@ pub use types::{
 pub use base::{Tool, ToolBuilder};
 pub use registry::{ToolRegistry, ToolManager, ToolLoader};
 pub use permissions::{PermissionChecker, ModeChecker};
+// 重新导出 API 集成类型
+pub use api_client::tool_use::{ToolCallHandler, ToolCall};
+pub use api_client::integration::ApiToolHandler;
 pub use file_tools::{FileReadTool, FileEditTool, FileWriteTool};
 pub use search_tools::{GlobTool, GrepTool};
 pub use command_tools::{BashTool, PowerShellTool};
 pub use web_tools::{WebFetchTool, WebSearchTool};
+#[cfg(feature = "full")]
 pub use skill_tools::{SkillTool, SkillListTool};
+#[cfg(not(feature = "full"))]
+pub use skill_tools::SkillTool;
 pub use message_tools::SendMessageTool;
 pub use task_tools::TaskCreateTool;
 pub use plan_tools::{EnterPlanModeTool, ExitPlanModeTool};
+#[cfg(feature = "git-worktree")]
 pub use git_tools::EnterWorktreeTool;
 pub use user_tools::AskUserQuestionTool;
 pub use lsp_tools::LSPTool;
@@ -93,7 +101,9 @@ impl ToolLoader for BuiltinToolLoader {
         registry.register(WebSearchTool::default()).await;
         
         // 注册系统工具
+        #[cfg(feature = "full")]
         registry.register(SkillTool).await;
+        #[cfg(feature = "full")]
         registry.register(SkillListTool).await;
         registry.register(SendMessageTool).await;
         registry.register(TaskCreateTool).await;
@@ -104,6 +114,7 @@ impl ToolLoader for BuiltinToolLoader {
         registry.register(ToolSearchTool).await;
         
         // 注册Git工具
+        #[cfg(feature = "git-worktree")]
         registry.register(EnterWorktreeTool).await;
         
         // 注册用户交互工具

@@ -100,7 +100,7 @@ pub trait Tool: Send + Sync {
     async fn handle_api_tool_result(
         &self,
         tool_result: ApiToolResult,
-        context: ToolUseContext,
+        _context: ToolUseContext,
     ) -> Result<ToolResult<serde_json::Value>> {
         if tool_result.is_error == Some(true) {
             // 工具调用失败

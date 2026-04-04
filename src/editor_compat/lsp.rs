@@ -4,6 +4,7 @@
 
 use super::common::*;
 use crate::error::Result;
+use std::collections::HashMap;
 
 /// LSP 集成
 pub struct LspIntegration {

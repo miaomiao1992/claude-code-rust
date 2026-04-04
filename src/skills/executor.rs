@@ -2,22 +2,23 @@
 //!
 //! 实现技能的调度和执行功能
 
+use std::sync::Arc;
 use std::time::Instant;
 
 use crate::error::{Result, ClaudeError};
-use super::types::{Skill, SkillContext, SkillResult};
+use super::types::{SkillContext, SkillResult};
 use super::registry::SkillManager;
 
 /// 技能执行器
 #[derive(Clone)]
 pub struct SkillExecutor {
-    manager: SkillManager,
+    manager: Arc<SkillManager>,
 }
 
 impl SkillExecutor {
     /// 创建新的技能执行器
     pub fn new(manager: SkillManager) -> Self {
-        Self { manager }
+        Self { manager: Arc::new(manager) }
     }
 
     /// 执行技能

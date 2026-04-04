@@ -23,7 +23,7 @@ once_cell.workspace = true
 indexmap.workspace = true
 
 # 特定依赖
-git2 = "0.20"
+git2 = { version = "0.20", optional = true }
 glob = "0.3"
 ignore = "0.4"
 regex = "1.10"
@@ -40,6 +40,8 @@ api-client = { path = "../api-client", optional = true }
 default = []
 # 启用API工具调用支持
 api-tool-use = ["api-client"]
+# 启用git worktree支持
+git-worktree = ["git2"]
 
 [dev-dependencies]
 tempfile = "3.8"

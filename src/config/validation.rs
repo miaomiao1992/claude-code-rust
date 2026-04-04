@@ -83,7 +83,7 @@ impl ValidationResult {
         if self.is_valid {
             Ok(())
         } else {
-            Err(ConfigError::ValidationFailed(self.errors))
+            Err(crate::error::ClaudeError::ConfigError(ConfigError::ValidationFailed(self.errors)))
         }
     }
 }
@@ -374,7 +374,7 @@ impl ConfigValidator for PathValidator {
 }
 
 /// 验证规则集合
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct ValidationSchema {
     rules: HashMap<String, Vec<Box<dyn ConfigValidator>>>,
 }

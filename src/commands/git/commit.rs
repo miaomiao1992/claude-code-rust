@@ -7,7 +7,7 @@ use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, PromptCommand, LoadedFrom, CommandSource,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+use super::GitError;
 
 /// 提交命令
 pub struct CommitCommand;
@@ -19,7 +19,7 @@ impl CommandExecutor for CommitCommand {
         let args = parse_commit_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 获取变更
         let changes = get_git_changes(&context.cwd, &args.files).await?;
@@ -103,13 +103,13 @@ fn parse_commit_args(args: &str) -> CommitArgs {
 async fn get_git_changes(cwd: &std::path::Path, files: &[String]) -> Result<String> {
     if files.is_empty() {
         // 获取所有暂存区变更
-        utils::execute_git_command(cwd, &["diff", "--staged", "--stat"])
-            .or_else(|_| utils::execute_git_command(cwd, &["status", "--porcelain"]))
+        super::execute_git_command(cwd, &["diff", "--staged", "--stat"])
+            .or_else(|_| super::execute_git_command(cwd, &["status", "--porcelain"]))
     } else {
         // 获取指定文件的变更
         let mut args = vec!["diff", "--"];
         args.extend(files.iter().map(|s| s.as_str()));
-        utils::execute_git_command(cwd, &args)
+        super::execute_git_command(cwd, &args)
     }
 }
 
@@ -142,11 +142,11 @@ async fn execute_git_commit(
     if !files.is_empty() {
         let mut add_args = vec!["add"];
         add_args.extend(files.iter().map(|s| s.as_str()));
-        utils::execute_git_command(cwd, &add_args)?;
+        super::execute_git_command(cwd, &add_args)?;
     }
 
     // 执行提交
-    let commit_output = utils::execute_git_command(cwd, &["commit", "-m", message])?;
+    let commit_output = super::execute_git_command(cwd, &["commit", "-m", message])?;
 
     // 提取提交哈希
     let commit_hash = extract_commit_hash(&commit_output);

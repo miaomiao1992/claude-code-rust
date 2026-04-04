@@ -41,7 +41,7 @@ impl Tool for FileReadTool {
 
         // 读取文件内容
         let content = std::fs::read_to_string(&full_path)
-            .map_err(|e| crate::error::ToolError::IoError(e))?;
+            .map_err(crate::error::ToolError::IoError)?;
 
         // 返回结果
         Ok(ToolResult::success(Value::String(content)))
@@ -89,7 +89,7 @@ impl Tool for FileEditTool {
 
         // 读取文件内容
         let content = std::fs::read_to_string(&full_path)
-            .map_err(|e| crate::error::ToolError::IoError(e))?;
+            .map_err(crate::error::ToolError::IoError)?;
 
         // 替换文本
         if !content.contains(old_string) {
@@ -102,7 +102,7 @@ impl Tool for FileEditTool {
 
         // 写入文件
         std::fs::write(&full_path, new_content)
-            .map_err(|e| crate::error::ToolError::IoError(e))?;
+            .map_err(crate::error::ToolError::IoError)?;
 
         // 返回结果
         Ok(ToolResult::success(Value::String("File edited successfully".to_string())))
@@ -146,7 +146,7 @@ impl Tool for FileWriteTool {
 
         // 写入文件
         std::fs::write(&full_path, content)
-            .map_err(|e| crate::error::ToolError::IoError(e))?;
+            .map_err(crate::error::ToolError::IoError)?;
 
         // 返回结果
         Ok(ToolResult::success(Value::String("File written successfully".to_string())))

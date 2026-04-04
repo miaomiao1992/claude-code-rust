@@ -7,7 +7,6 @@ use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, PromptCommand, LoadedFrom, CommandSource,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
 
 /// PR评论命令
 pub struct PrCommentsCommand;

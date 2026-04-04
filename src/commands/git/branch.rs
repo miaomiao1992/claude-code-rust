@@ -5,10 +5,10 @@
 use crate::error::Result;
 use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, LocalJsxCommand, LoadedFrom,
-    CommandSource, CommandResultDisplay,
+    CommandResultDisplay,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+use super::GitError;
 
 /// 分支命令
 pub struct BranchCommand;
@@ -20,7 +20,7 @@ impl CommandExecutor for BranchCommand {
         let args = parse_branch_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 创建分支
         let branch_info = create_branch(&context.cwd, &args).await?;
@@ -124,7 +124,7 @@ async fn create_branch(cwd: &std::path::Path, args: &BranchArgs) -> Result<Branc
     let from_point = args.from.as_deref().unwrap_or("HEAD");
 
     // 检查起点是否存在
-    let from_hash = utils::execute_git_command(cwd, &["rev-parse", "--verify", from_point])
+    let from_hash = super::execute_git_command(cwd, &["rev-parse", "--verify", from_point])
         .map_err(|_| GitError::InvalidArguments {
             message: format!("Start point '{}' does not exist", from_point),
         })?;
@@ -140,13 +140,13 @@ async fn create_branch(cwd: &std::path::Path, args: &BranchArgs) -> Result<Branc
     create_args.push(from_point);
 
     // 创建分支
-    let create_output = utils::execute_git_command(cwd, &create_args)?;
+    let create_output = super::execute_git_command(cwd, &create_args)?;
 
     let created = !create_output.contains("already exists") || args.force;
 
     // 如果需要，切换到新分支
     let checked_out = if args.checkout {
-        let checkout_output = utils::execute_git_command(cwd, &["checkout", branch_name])
+        let checkout_output = super::execute_git_command(cwd, &["checkout", branch_name])
             .map_err(|e| GitError::GitCommandFailed {
                 command: format!("git checkout {}", branch_name),
                 stderr: e.to_string(),
@@ -157,7 +157,7 @@ async fn create_branch(cwd: &std::path::Path, args: &BranchArgs) -> Result<Branc
     };
 
     // 获取分支哈希
-    let hash = utils::execute_git_command(cwd, &["rev-parse", "--short", branch_name])
+    let hash = super::execute_git_command(cwd, &["rev-parse", "--short", branch_name])
         .ok()
         .map(|h| h.trim().to_string());
 

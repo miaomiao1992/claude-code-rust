@@ -115,6 +115,7 @@ pub enum ViolationType {
     EnvAccess,
 }
 
+#[derive(Debug)]
 pub struct PluginSandbox {
     config: IsolationConfig,
     violations: Arc<RwLock<Vec<SandboxViolation>>>,

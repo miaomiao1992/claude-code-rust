@@ -4,6 +4,7 @@
 //! 提供统一、安全的插件接口。
 
 use crate::error::Result;
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -29,7 +30,7 @@ pub enum PluginState {
 }
 
 /// 插件元数据
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginMetadata {
     /// 插件名称
     pub name: String,

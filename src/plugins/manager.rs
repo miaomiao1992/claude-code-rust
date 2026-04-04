@@ -175,7 +175,7 @@ impl PluginManager {
             if let Ok(metadata_symbol) = lib.get::<libloading::Symbol<*const u8>>(b"plugin_metadata") {
                 let metadata_ptr = *metadata_symbol;
                 if !metadata_ptr.is_null() {
-                    let c_str = std::ffi::CStr::from_ptr(metadata_ptr as *const i8);
+                    let c_str = std::ffi::CStr::from_ptr(metadata_ptr as *const std::os::raw::c_char);
                     let json_str = c_str.to_str()?;
                     let mut metadata: PluginMetadata = serde_json::from_str(json_str)?;
                     if metadata.entry_point.is_empty() {

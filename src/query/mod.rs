@@ -18,7 +18,7 @@ pub use message::{Message, MessageRole, MessageContent, ToolCall, ToolResult};
 pub use result::{QueryResult, QueryError, QueryStatus};
 pub use pipeline::{QueryPipeline, PipelineStage};
 pub use compressor::{ContextCompressor, CompressorConfig};
-pub use retry::{RetryPolicy, RetryStrategy, RetryError, exponential_backoff};
+pub use retry::{RetryStrategy, RetryError, RetryPolicyBuilder, exponential_backoff};
 
 /// 查询系统初始化
 pub async fn init() -> anyhow::Result<QueryEngine> {

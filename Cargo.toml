@@ -27,10 +27,10 @@ async-trait = "0.1"
 futures = "0.3"
 
 # HTTP相关依赖
-reqwest = { version = "0.12", features = ["json", "stream", "cookies"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "cookies", "gzip", "default-tls"] }
 url = "2.5"
 urlencoding = "2.1"
-flate2 = "1.0"
+flate2 = { version = "1.0", default-features = false, features = ["rust_backend"] }
 tokio-tungstenite = "0.21"
 
 # 配置和文件系统
@@ -82,10 +82,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 async-trait = "0.1"
 futures = "0.3"
-reqwest = { version = "0.12", features = ["json", "stream", "cookies"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "cookies", "gzip", "default-tls"] }
 url = "2.5"
 urlencoding = "2.1"
-flate2 = "1.0"
+flate2 = { version = "1.0", default-features = false, features = ["rust_backend"] }
 config = "0.14"
 toml = "0.8"
 dirs = "5.0"
@@ -101,17 +101,22 @@ console = "0.15"
 indicatif = "0.18"
 async-stream = "0.3"
 libloading = "0.8"
+tokio-tungstenite.workspace = true
 axum = "0.7"
 api-client = { path = "crates/api-client" }
+tools = { path = "crates/tools" }
 regex = "1.10"
 crossterm = "0.27"
 base64 = "0.21"
-git2 = "0.20"
 whoami = "1.5"
 retry = "2.0"
 ctrlc = "3.4"
 glob-match = "0.2"
 num_cpus = "1.16"
+
+[features]
+default = []
+git-worktree = ["tools/git-worktree"]
 
 [profile.release]
 opt-level = 3

@@ -83,16 +83,13 @@ impl StreamHandler for DefaultStreamHandler {
             }
             StreamEvent::ContentBlockStart { index, content_block } => {
                 self.current_block_index = Some(index);
-                match content_block.content_block_type {
-                    crate::types::ApiContentType::ToolUse => {
-                        // 开始新的工具调用
-                        self.current_tool_call = Some(PartialToolCall {
-                            id: String::new(),
-                            name: String::new(),
-                            input: Value::Null,
-                        });
-                    }
-                    _ => {}
+                if let crate::types::ApiContentType::ToolUse = content_block.content_block_type {
+                    // 开始新的工具调用
+                    self.current_tool_call = Some(PartialToolCall {
+                        id: String::new(),
+                        name: String::new(),
+                        input: Value::Null,
+                    });
                 }
             }
             StreamEvent::ContentBlockDelta { index: _, delta } => match delta {

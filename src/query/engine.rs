@@ -9,7 +9,7 @@ use api_client::{ApiClient, ApiClientConfig};
 use crate::error::Result;
 
 use super::context::QueryContext;
-use super::message::{Message, MessageRole, MessageContent};
+use super::message::{Message, MessageRole, MessageContent, ToolCall, ToolResult};
 use super::result::{QueryResult, QueryError};
 use super::pipeline::QueryPipeline;
 use super::compressor::ContextCompressor;
@@ -195,7 +195,8 @@ impl QueryEngine {
 
         // 平台信息
         builder.set_env_info("Platform", &std::env::consts::OS);
-        builder.set_env_info("Shell", &whoami::shell().to_string_lossy());
+        let shell = std::env::var("SHELL").unwrap_or_else(|_| "unknown".to_string());
+        builder.set_env_info("Shell", &shell);
         builder.set_env_info("OS Version", &whoami::distro());
 
         // Claude Code 信息

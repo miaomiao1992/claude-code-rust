@@ -17,11 +17,11 @@ pub struct UpgradeCommand;
 #[async_trait]
 impl CmdExecutor for UpgradeCommand {
     async fn execute(&self, context: CommandContext) -> Result<CommandResult> {
-        let args = context.args.unwrap_or_default();
-        let message = if args.len() > 0 {
-            match args[0].as_str() {
-                "check" => check_for_updates().await?,
-                "execute" => execute_upgrade()?,
+        let args = if context.args.is_empty() { String::new() } else { context.args.clone() };
+        let message = if !args.is_empty() {
+            match args.chars().next().unwrap_or('\0') {
+                'c' if args.starts_with("check") => check_for_updates().await?,
+                'e' if args.starts_with("execute") => execute_upgrade()?,
                 _ => format!("Invalid argument. Usage: claude upgrade [check|execute]"),
             }
         } else {

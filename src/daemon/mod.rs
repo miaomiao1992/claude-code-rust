@@ -1,4 +1,8 @@
 //! Daemon mode
+//!
+//! Daemon mode is only available on Unix systems
+
+#![cfg(unix)]
 
 use crate::config::Config;
 use crate::error::Result;
@@ -8,7 +12,6 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use tokio::net::UnixListener;
-use tokio::runtime::Runtime;
 use tokio::sync::mpsc;
 
 /// Daemon mode

@@ -211,19 +211,21 @@ impl ApiClient {
         // 创建流式响应处理器
         let stream = response.bytes_stream();
         let event_stream = stream.map(|chunk_result| {
-            let chunk = chunk_result.map_err(|e| ApiError::Network(e))?;
+            let chunk = chunk_result.map_err(ApiError::Network)?;
             let chunk_str = String::from_utf8_lossy(&chunk);
 
             // 解析SSE事件
             for line in chunk_str.lines() {
                 if line.starts_with("data: ") {
-                    let data = &line[6..];
+                    let Some(data) = line.strip_prefix("data: ") else {
+                        continue;
+                    };
                     if data == "[DONE]" {
                         continue;
                     }
 
                     let event: StreamEvent =
-                        serde_json::from_str(data).map_err(|e| ApiError::Serialization(e))?;
+                        serde_json::from_str(data).map_err(ApiError::Serialization)?;
                     return Ok(event);
                 }
             }
@@ -388,10 +390,7 @@ impl ApiClient {
             });
 
             // 检查是否有工具调用
-            let has_tool_calls = response.content.iter().any(|block| match block {
-                ApiContentBlock::ToolUse { .. } => true,
-                _ => false,
-            });
+            let has_tool_calls = response.content.iter().any(|block| matches!(block, ApiContentBlock::ToolUse { .. }));
 
             if !has_tool_calls {
                 // 没有工具调用，完成

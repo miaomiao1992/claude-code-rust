@@ -5,10 +5,10 @@
 use crate::error::Result;
 use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, LocalJsxCommand, LoadedFrom,
-    CommandSource, CommandResultDisplay,
+    CommandResultDisplay,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+use super::GitError;
 
 /// 差异命令
 pub struct DiffCommand;
@@ -20,7 +20,7 @@ impl CommandExecutor for DiffCommand {
         let args = parse_diff_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 获取差异
         let diff_output = get_git_diff(&context.cwd, &args.files, args.staged, args.cached).await?;
@@ -120,16 +120,13 @@ async fn get_git_diff(
         diff_args.extend(files.iter().map(|s| s.as_str()));
     }
 
-    utils::execute_git_command(cwd, &diff_args)
+    super::execute_git_command(cwd, &diff_args)
         .or_else(|_| {
             // 如果差异为空，尝试获取状态
             if files.is_empty() {
-                utils::execute_git_command(cwd, &["status", "--porcelain"])
+                super::execute_git_command(cwd, &["status", "--porcelain"])
             } else {
-                Err(GitError::GitCommandFailed {
-                    command: "git diff".to_string(),
-                    stderr: "No output".to_string(),
-                })
+                Err(ClaudeError::Other("git diff: No output".to_string()))
             }
         })
         .map_err(Into::into)

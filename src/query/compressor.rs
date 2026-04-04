@@ -4,6 +4,7 @@
 
 use super::message::{Message, MessageContent};
 use super::result::QueryError;
+use tracing::debug;
 
 /// 压缩器配置
 #[derive(Debug, Clone)]

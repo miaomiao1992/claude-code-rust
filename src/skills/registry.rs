@@ -122,7 +122,6 @@ impl Default for SkillRegistry {
 }
 
 /// 技能管理器
-#[derive(Clone)]
 pub struct SkillManager {
     registry: SkillRegistry,
     loaders: Vec<Box<dyn SkillLoader>>,

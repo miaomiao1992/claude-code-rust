@@ -27,8 +27,9 @@ impl Default for ApiConfig {
                 .or(std::env::var("DASHSCOPE_API_KEY").ok())
                 .or(std::env::var("DEEPSEEK_API_KEY").ok()),
             base_url: std::env::var("API_BASE_URL")
+                .ok()
                 .or(std::env::var("ANTHROPIC_BASE_URL").ok())
-                .unwrap_or_else(|_| "https://api.anthropic.com".to_string()),
+                .unwrap_or_else(|| "https://api.anthropic.com".to_string()),
             max_tokens: 4096,
             timeout: 120,
             streaming: true,
@@ -50,8 +51,9 @@ impl ApiConfig {
     /// Get the base URL, checking environment variable first
     pub fn get_base_url(&self) -> String {
         std::env::var("API_BASE_URL")
+            .ok()
             .or(std::env::var("ANTHROPIC_BASE_URL").ok())
-            .unwrap_or_else(|_| self.base_url.clone())
+            .unwrap_or_else(|| self.base_url.clone())
     }
 
     /// Get the model ID for the given model name

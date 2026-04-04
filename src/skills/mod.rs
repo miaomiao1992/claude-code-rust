@@ -15,8 +15,8 @@ pub mod discovery;
 
 // 重新导出主要类型
 pub use types::{Skill, SkillMetadata, SkillResult, SkillContext, SkillInputSchema};
-pub use registry::{SkillRegistry, SkillManager};
-pub use loader::{SkillLoader, BuiltinSkillLoader, FileSystemSkillLoader};
+pub use registry::{SkillRegistry, SkillManager, SkillLoader};
+pub use loader::{BuiltinSkillLoader, FileSystemSkillLoader};
 pub use executor::SkillExecutor;
 pub use discovery::SkillDiscovery;
 

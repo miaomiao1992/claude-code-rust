@@ -1,6 +1,6 @@
 //! Bridge 远程控制服务入口
 
-use claude_code_rs::{bridge, error::Result, state::new_app_state, config::Config};
+use claude_code_workspace::{bridge, error::Result, state::new_app_state, config::Config};
 use clap::{Parser, Subcommand};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -119,7 +119,7 @@ async fn run(cli: BridgeCli) -> Result<()> {
 }
 
 /// 启动 Bridge 服务器
-async fn start_bridge_server(address: &str, session_mode: &str, state: claude_code_rs::state::AppState) -> Result<()> {
+async fn start_bridge_server(address: &str, session_mode: &str, state: claude_code_workspace::state::AppState) -> Result<()> {
     tracing::info!("Starting Bridge server on {}", address);
     
     // 解析会话模式

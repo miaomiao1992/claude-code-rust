@@ -13,7 +13,7 @@ pub struct SystemCommandLoader;
 #[async_trait::async_trait]
 impl CommandLoader for SystemCommandLoader {
     async fn load(&self, registry: &CommandRegistry) -> Result<()> {
-        registry.register(DoctorCommand).await?;
+        registry.register(DoctorCommand).await;
 
         tracing::debug!("Loaded system diagnostic commands");
 

@@ -257,13 +257,13 @@ fn export_as_json(
                 "role": m.role,
                 "content": m.content,
                 "timestamp": m.timestamp.to_rfc3339(),
-            })).collect::<Vec<_>(),
+            })).collect::<Vec<_>>(),
         })
     } else {
         serde_json::json!(messages.iter().map(|m| serde_json::json!({
             "role": m.role,
             "content": m.content,
-        })).collect::<Vec<_>())
+        })).collect::<Vec<_>>())
     };
 
     serde_json::to_string_pretty(&data).unwrap_or_default()

@@ -5,10 +5,9 @@
 use crate::base::Tool;
 use crate::types::{ApiToolDefinition, ApiToolCall, ApiToolResult, ToolCallResponse, ToolExecutionOptions, ToolMetadata, ToolUseContext};
 use anyhow::Result;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use uuid::Uuid;
 
 /// 工具加载器 trait
 #[async_trait::async_trait]
@@ -23,7 +22,7 @@ pub trait ToolLoader: Send + Sync {
 /// 工具注册表
 ///
 /// 负责存储和管理所有注册的工具
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ToolRegistry {
     /// 工具映射（名称 -> 工具）
     tools: Arc<RwLock<HashMap<String, Arc<dyn Tool>>>>,
@@ -34,10 +33,12 @@ pub struct ToolRegistry {
 impl ToolRegistry {
     /// 创建新的工具注册表
     pub fn new() -> Self {
-        Self {
-            tools: Arc::new(RwLock::new(HashMap::new())),
-            aliases: Arc::new(RwLock::new(HashMap::new())),
-        }
+        Self::default()
+    }
+
+    /// 检查注册表是否为空
+    pub async fn is_empty(&self) -> bool {
+        self.tools.read().await.is_empty()
     }
 
     /// 注册工具
@@ -122,7 +123,7 @@ impl ToolRegistry {
         let tool = self.get(tool_name).await
             .ok_or_else(|| anyhow::anyhow!("Tool not found: {}", tool_name))?;
 
-        tool.execute_with_options(input, context, options).await
+        tool.execute_with_options(input, context, options).await.map_err(|e| anyhow::anyhow!("{:?}", e))
     }
 
     /// 处理API工具调用
@@ -175,6 +176,7 @@ impl ToolRegistry {
 /// 工具管理器
 ///
 /// 负责管理工具加载器和加载工具，支持API工具调用集成
+#[derive(Default)]
 pub struct ToolManager {
     /// 工具注册表
     registry: ToolRegistry,
@@ -191,6 +193,15 @@ impl ToolManager {
             registry: ToolRegistry::new(),
             loaders: Arc::new(RwLock::new(Vec::new())),
             execution_options,
+        }
+    }
+
+    /// 创建新的工具管理器使用默认执行选项
+    pub fn default() -> Self {
+        Self {
+            registry: ToolRegistry::new(),
+            loaders: Arc::new(RwLock::new(Vec::new())),
+            execution_options: ToolExecutionOptions::default(),
         }
     }
 

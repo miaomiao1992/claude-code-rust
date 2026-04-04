@@ -401,6 +401,29 @@ pub struct CommandResult {
     pub submit_next_input: bool,
 }
 
+impl Default for CommandBase {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            description: String::new(),
+            has_user_specified_description: None,
+            aliases: None,
+            availability: None,
+            is_hidden: None,
+            is_mcp: None,
+            argument_hint: None,
+            when_to_use: None,
+            version: None,
+            disable_model_invocation: None,
+            user_invocable: None,
+            loaded_from: None,
+            kind: None,
+            immediate: None,
+            is_sensitive: None,
+        }
+    }
+}
+
 impl Default for CommandResult {
     fn default() -> Self {
         Self {

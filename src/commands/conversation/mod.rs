@@ -28,11 +28,11 @@ pub struct ConversationCommandLoader;
 #[async_trait::async_trait]
 impl CommandLoader for ConversationCommandLoader {
     async fn load(&self, registry: &CommandRegistry) -> Result<()> {
-        registry.register(ResumeCommand).await?;
-        registry.register(CompactCommand).await?;
-        registry.register(ExportCommand).await?;
-        registry.register(RenameCommand).await?;
-        registry.register(RewindCommand).await?;
+        registry.register(ResumeCommand).await;
+        registry.register(CompactCommand).await;
+        registry.register(ExportCommand).await;
+        registry.register(RenameCommand).await;
+        registry.register(RewindCommand).await;
 
         tracing::debug!("Loaded conversation management commands");
 
@@ -152,7 +152,7 @@ impl ConversationStorage for FileConversationStorage {
                 "role": m.role,
                 "content": m.content,
                 "timestamp": m.timestamp,
-            })).collect::<Vec<_>(),
+            })).collect::<Vec<_>>(),
         });
 
         let path = self.conversation_path(&conversation.id);

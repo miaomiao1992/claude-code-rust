@@ -4,7 +4,9 @@
       "Bash(xargs grep:*)",
       "Bash(cargo check:*)",
       "Read(//c/tmp/**)",
-      "Read(//c/temp/**)"
+      "Read(//c/temp/**)",
+      "Bash(cargo build:*)",
+      "Bash(cargo tree:*)"
     ]
   }
 }

@@ -200,7 +200,7 @@ impl OAuthClient {
             .form(&params)
             .send()
             .await
-            .map_err(|e| ApiError::network(e))?;
+            .map_err(ApiError::network)?;
 
         if !response.status().is_success() {
             let status = response.status().as_u16();
@@ -214,7 +214,7 @@ impl OAuthClient {
         let token_response: TokenResponse = response
             .json()
             .await
-            .map_err(|e| ApiError::network(e))?;
+            .map_err(ApiError::network)?;
 
         let token = OAuthToken::from_response(token_response);
         self.token = Some(token);
@@ -249,7 +249,7 @@ impl OAuthClient {
             .form(&params)
             .send()
             .await
-            .map_err(|e| ApiError::network(e))?;
+            .map_err(ApiError::network)?;
 
         if !response.status().is_success() {
             let status = response.status().as_u16();
@@ -263,7 +263,7 @@ impl OAuthClient {
         let token_response: TokenResponse = response
             .json()
             .await
-            .map_err(|e| ApiError::network(e))?;
+            .map_err(ApiError::network)?;
 
         let token = OAuthToken::from_response(token_response);
         self.token = Some(token);

@@ -8,7 +8,7 @@ use crate::tools::ToolManager;
 use std::sync::Arc;
 
 /// 查询上下文
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct QueryContext {
     /// 配置设置
     pub settings: Settings,

@@ -4,9 +4,9 @@
 
 use crate::commands::builtin::load_builtin_commands;
 use crate::commands::cli::{CliInterface, BatchProcessor};
-use crate::commands::executor::{CmdExecutor, UserInput};
+use crate::commands::executor::CmdExecutor;
 use crate::commands::registry::CommandManager;
-use crate::config::{Config, Settings};
+use crate::config::Settings;
 use crate::error::Result;
 use crate::state::AppState;
 use std::path::PathBuf;

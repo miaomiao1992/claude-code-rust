@@ -37,13 +37,13 @@ pub struct GitCommandLoader;
 #[async_trait::async_trait]
 impl CommandLoader for GitCommandLoader {
     async fn load(&self, registry: &CommandRegistry) -> Result<()> {
-        registry.register(CommitCommand).await?;
-        registry.register(DiffCommand).await?;
-        registry.register(ReviewCommand).await?;
-        registry.register(BranchCommand).await?;
-        registry.register(PrCommentsCommand).await?;
-        registry.register(CommitPushPrCommand).await?;
-        registry.register(SecurityReviewCommand).await?;
+        registry.register(CommitCommand).await;
+        registry.register(DiffCommand).await;
+        registry.register(ReviewCommand).await;
+        registry.register(BranchCommand).await;
+        registry.register(PrCommentsCommand).await;
+        registry.register(CommitPushPrCommand).await;
+        registry.register(SecurityReviewCommand).await;
 
         tracing::debug!("Loaded Git commands");
 
@@ -98,30 +98,27 @@ pub fn is_git_repository(path: &Path) -> bool {
 }
 
 /// 确保当前目录是Git仓库
-pub fn ensure_git_repository(path: &Path) -> Result<(), GitError> {
+pub fn ensure_git_repository(path: &Path) -> Result<()> {
     if !is_git_repository(path) {
-        return Err(GitError::NotGitRepository);
+        return Err(ClaudeError::Other("Not a git repository".to_string()));
     }
     Ok(())
 }
 
 /// 执行Git命令并返回输出
-pub fn execute_git_command(path: &Path, args: &[&str]) -> Result<String, GitError> {
+pub fn execute_git_command(path: &Path, args: &[&str]) -> Result<String> {
     let output = Command::new("git")
         .args(args)
         .current_dir(path)
         .output()
-        .map_err(|e| GitError::GitCommandFailed {
-            command: format!("git {}", args.join(" ")),
-            stderr: e.to_string(),
-        })?;
+        .map_err(|e| ClaudeError::Other(format!("Git command failed: {}", e)))?;
 
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(GitError::GitCommandFailed {
-            command: format!("git {}", args.join(" ")),
-            stderr: String::from_utf8_lossy(&output.stderr).to_string(),
-        })
+        Err(ClaudeError::Other(format!(
+            "Git command failed: git {}",
+            args.join(" ")
+        )))
     }
 }

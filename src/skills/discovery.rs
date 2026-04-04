@@ -140,7 +140,7 @@ impl SkillDiscovery {
                 if path_str.starts_with(pat) {
                     return true;
                 }
-            } else if path_str == pattern {
+            } else if path_str == *pattern {
                 return true;
             }
         }

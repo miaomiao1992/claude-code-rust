@@ -264,7 +264,7 @@ impl ToolCallContext {
     /// 获取输入参数作为指定类型
     pub fn get_input_as<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
         serde_json::from_value(self.tool_call.input.clone())
-            .map_err(|e| crate::error::ApiError::Serialization(e))
+            .map_err(crate::error::ApiError::Serialization)
     }
 
     /// 获取输入参数作为字符串
@@ -272,7 +272,7 @@ impl ToolCallContext {
         match &self.tool_call.input {
             Value::String(s) => Ok(s.clone()),
             _ => serde_json::to_string(&self.tool_call.input)
-                .map_err(|e| crate::error::ApiError::Serialization(e)),
+                .map_err(crate::error::ApiError::Serialization),
         }
     }
 }

@@ -7,7 +7,7 @@ use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, PromptCommand, LoadedFrom, CommandSource,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+use super::GitError;
 
 /// 安全审查命令
 pub struct SecurityReviewCommand;
@@ -19,7 +19,7 @@ impl CommandExecutor for SecurityReviewCommand {
         let args = parse_security_review_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 获取要审查的代码
         let code_to_review = get_code_for_review(&context.cwd, &args).await?;
@@ -213,7 +213,7 @@ async fn get_code_for_review(
 
 /// 获取更改的文件
 async fn get_changed_files(cwd: &std::path::Path) -> Result<Vec<String>> {
-    let status_output = utils::execute_git_command(cwd, &["status", "--porcelain"])?;
+    let status_output = super::execute_git_command(cwd, &["status", "--porcelain"])?;
 
     let files: Vec<String> = status_output
         .lines()
@@ -251,7 +251,7 @@ fn detect_language(file_path: &str) -> Option<String> {
 
 /// 获取Git差异范围
 async fn get_git_diff_range(cwd: &std::path::Path, range: &str) -> Result<String> {
-    utils::execute_git_command(cwd, &["diff", range]).map_err(Into::into)
+    super::execute_git_command(cwd, &["diff", range]).map_err(Into::into)
 }
 
 /// 构建代码摘要

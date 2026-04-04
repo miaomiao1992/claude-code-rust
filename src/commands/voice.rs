@@ -8,7 +8,6 @@ use crate::error::Result;
 use crate::state::AppState;
 use crate::voice::{VoiceService, TranscriptionService, RecordingState};
 use std::sync::Arc;
-use tokio::sync::RwLock;
 
 /// 语音命令处理器
 pub struct VoiceCommandHandler {

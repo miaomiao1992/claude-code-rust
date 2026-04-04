@@ -96,6 +96,12 @@ pub enum ClaudeError {
     
     /// Any other error
     Other(String),
+    
+    /// Editor error
+    Editor(String),
+    
+    /// Skill error
+    Skill(String),
 }
 
 impl fmt::Display for ClaudeError {
@@ -117,6 +123,8 @@ impl fmt::Display for ClaudeError {
             ClaudeError::Agent(msg) => write!(f, "Agent error: {}", msg),
             ClaudeError::NotImplemented(msg) => write!(f, "Not implemented: {}", msg),
             ClaudeError::Other(msg) => write!(f, "Error: {}", msg),
+            ClaudeError::Editor(msg) => write!(f, "Editor error: {}", msg),
+            ClaudeError::Skill(msg) => write!(f, "Skill error: {}", msg),
         }
     }
 }
@@ -204,5 +212,17 @@ impl From<libloading::Error> for ClaudeError {
 impl From<ConfigError> for ClaudeError {
     fn from(err: ConfigError) -> Self {
         ClaudeError::ConfigError(err)
+    }
+}
+
+impl From<std::ffi::NulError> for ClaudeError {
+    fn from(err: std::ffi::NulError) -> Self {
+        ClaudeError::Other(err.to_string())
+    }
+}
+
+impl From<std::str::Utf8Error> for ClaudeError {
+    fn from(err: std::str::Utf8Error) -> Self {
+        ClaudeError::Other(err.to_string())
     }
 }

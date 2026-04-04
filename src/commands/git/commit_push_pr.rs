@@ -7,7 +7,7 @@ use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, PromptCommand, LoadedFrom, CommandSource,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+use super::GitError;
 
 /// 提交推送PR命令
 pub struct CommitPushPrCommand;
@@ -19,7 +19,7 @@ impl CommandExecutor for CommitPushPrCommand {
         let args = parse_commit_push_pr_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 执行工作流
         let workflow_result = execute_commit_push_pr_workflow(&context.cwd, &args).await?;
@@ -180,20 +180,20 @@ async fn execute_commit_push_pr_workflow(
     result.branch_name = branch_name.clone();
 
     // 检查是否需要创建新分支
-    let current_branch = utils::execute_git_command(cwd, &["branch", "--show-current"])
+    let current_branch = super::execute_git_command(cwd, &["branch", "--show-current"])
         .unwrap_or_default()
         .trim()
         .to_string();
 
     if current_branch != branch_name {
-        match utils::execute_git_command(cwd, &["checkout", "-b", &branch_name]) {
+        match super::execute_git_command(cwd, &["checkout", "-b", &branch_name]) {
             Ok(_) => {
                 result.branch_created = true;
             }
             Err(e) => {
                 result.errors.push(format!("Failed to create branch: {}", e));
                 // 尝试切换到现有分支
-                if let Err(e2) = utils::execute_git_command(cwd, &["checkout", &branch_name]) {
+                if let Err(e2) = super::execute_git_command(cwd, &["checkout", &branch_name]) {
                     result.errors.push(format!("Failed to checkout branch: {}", e2));
                     return Ok(result);
                 }
@@ -206,7 +206,7 @@ async fn execute_commit_push_pr_workflow(
         "Update code".to_string()
     });
 
-    match utils::execute_git_command(cwd, &["commit", "-am", &commit_message]) {
+    match super::execute_git_command(cwd, &["commit", "-am", &commit_message]) {
         Ok(output) => {
             result.commit_success = true;
             // 提取提交哈希
@@ -225,7 +225,7 @@ async fn execute_commit_push_pr_workflow(
         Err(e) => {
             result.errors.push(format!("Commit failed: {}", e));
             // 可能没有更改可提交
-            let status = utils::execute_git_command(cwd, &["status", "--porcelain"])
+            let status = super::execute_git_command(cwd, &["status", "--porcelain"])
                 .unwrap_or_default();
             if status.trim().is_empty() {
                 result.errors.push("No changes to commit".to_string());
@@ -236,7 +236,7 @@ async fn execute_commit_push_pr_workflow(
     // 步骤3：推送到远程
     let remote = args.remote.clone().unwrap_or_else(|| "origin".to_string());
 
-    match utils::execute_git_command(cwd, &["push", "--set-upstream", &remote, &branch_name]) {
+    match super::execute_git_command(cwd, &["push", "--set-upstream", &remote, &branch_name]) {
         Ok(output) => {
             result.push_success = true;
             result.push_output = Some(output);

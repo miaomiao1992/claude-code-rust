@@ -2,7 +2,7 @@
 //!
 //! 这个模块实现了工具权限检查机制，支持API工具调用权限检查
 
-use crate::types::{PermissionMode, PermissionResult, PermissionBehavior, ToolPermissionContext, ToolPermissionRule};
+use crate::types::{PermissionMode, PermissionResult, ToolPermissionContext, ToolPermissionRule};
 use serde_json::Value;
 
 /// 权限检查器
@@ -33,7 +33,7 @@ impl PermissionChecker {
         context: &ToolPermissionContext,
     ) -> PermissionResult {
         // 检查总是允许规则
-        for (_source, rules) in &context.always_allow_rules {
+        for rules in context.always_allow_rules.values() {
             for rule in rules {
                 if Self::matches_tool_name(&rule.name, tool_name) {
                     return PermissionResult::allow();
@@ -42,7 +42,7 @@ impl PermissionChecker {
         }
 
         // 检查总是拒绝规则
-        for (_source, rules) in &context.always_deny_rules {
+        for rules in context.always_deny_rules.values() {
             for rule in rules {
                 if Self::matches_tool_name(&rule.name, tool_name) {
                     return PermissionResult::deny(format!("Tool {} is denied by rule", tool_name));
@@ -51,7 +51,7 @@ impl PermissionChecker {
         }
 
         // 检查总是询问规则
-        for (_source, rules) in &context.always_ask_rules {
+        for rules in context.always_ask_rules.values() {
             for rule in rules {
                 if Self::matches_tool_name(&rule.name, tool_name) {
                     return PermissionResult::ask();
@@ -108,7 +108,7 @@ impl PermissionChecker {
         let source = source.into();
         context.always_allow_rules
             .entry(source)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(rule);
     }
 
@@ -121,7 +121,7 @@ impl PermissionChecker {
         let source = source.into();
         context.always_deny_rules
             .entry(source)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(rule);
     }
 
@@ -134,7 +134,7 @@ impl PermissionChecker {
         let source = source.into();
         context.always_ask_rules
             .entry(source)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(rule);
     }
 

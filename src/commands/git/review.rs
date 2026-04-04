@@ -7,7 +7,7 @@ use crate::commands::types::{
     Command, CommandBase, CommandContext, CommandResult, PromptCommand, LoadedFrom, CommandSource,
 };
 use crate::commands::registry::CommandExecutor;
-use super::{GitError, utils};
+// use super::GitError;  // 未使用
 
 /// 审查命令
 pub struct ReviewCommand;
@@ -19,7 +19,7 @@ impl CommandExecutor for ReviewCommand {
         let args = parse_review_args(&context.args);
 
         // 检查Git仓库
-        utils::ensure_git_repository(&context.cwd)?;
+        super::ensure_git_repository(&context.cwd)?;
 
         // 获取PR信息
         let pr_info = get_pr_info(&context.cwd, &args).await?;
@@ -122,7 +122,7 @@ async fn get_pr_info(cwd: &std::path::Path, args: &ReviewArgs) -> Result<PrInfo>
     }
 
     // 否则，获取当前分支的差异
-    let current_branch = utils::execute_git_command(cwd, &["branch", "--show-current"])?
+    let current_branch = super::execute_git_command(cwd, &["branch", "--show-current"])?
         .trim()
         .to_string();
 
@@ -172,14 +172,14 @@ async fn get_pr_diff(cwd: &std::path::Path, args: &ReviewArgs) -> Result<String>
     let head_branch = if let Some(pr_number) = args.pr_number {
         format!("pull/{}/head", pr_number)
     } else {
-        utils::execute_git_command(cwd, &["branch", "--show-current"])?
+        super::execute_git_command(cwd, &["branch", "--show-current"])?
             .trim()
             .to_string()
     };
 
     // 获取差异
-    utils::execute_git_command(cwd, &["diff", &format!("{}..{}", base_branch, head_branch)])
-        .or_else(|_| utils::execute_git_command(cwd, &["diff", &base_branch]))
+    super::execute_git_command(cwd, &["diff", &format!("{}..{}", base_branch, head_branch)])
+        .or_else(|_| super::execute_git_command(cwd, &["diff", &base_branch]))
         .map_err(Into::into)
 }
 

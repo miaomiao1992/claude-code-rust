@@ -3,7 +3,7 @@
 //! Main entry point for the Claude Code CLI application.
 
 use clap::{Parser, Subcommand};
-use claude_code_rs::{commands, config, error::Result, state};
+use claude_code_workspace::{commands, config, error::Result, state};
 use std::process;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 

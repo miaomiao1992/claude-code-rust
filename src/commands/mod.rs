@@ -47,10 +47,10 @@ pub use cli::{
 
 use crate::error::Result;
 use crate::state::AppState;
-use super::git::GitCommandLoader;
-use super::conversation::ConversationCommandLoader;
-use super::config::ConfigCommandLoader;
-use super::system::SystemCommandLoader;
+use self::git::GitCommandLoader;
+use self::conversation::ConversationCommandLoader;
+use self::config::ConfigCommandLoader;
+use self::system::SystemCommandLoader;
 
 /// 初始化命令系统
 pub async fn init() -> Result<CommandManager> {
