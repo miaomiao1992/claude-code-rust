@@ -8,9 +8,7 @@
 <img width="3840" height="2088" alt="2561d18937db04132ae9c747df0d3339" src="https://github.com/user-attachments/assets/d45dc596-4c51-48b0-8935-08331f46f807" />
 
 <img width="3840" height="2088" alt="c56bf574e6ccbaf8b224e81c2800c8a1" src="https://github.com/user-attachments/assets/bf25f74f-3665-4cc6-8d96-01de0c715b5f" />
-这是中国首个rust全量重构，高完整度的claude code ！
-兄弟们，这也是我花3天通宵完成的项目！！！
-不行了要好好睡一觉了！
+
 
 
 ## ✨ 主要特性
